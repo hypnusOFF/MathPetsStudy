@@ -20,21 +20,20 @@ jobs:
     timeout-minutes: 30
     steps:
       - name: Check out source
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: Install .NET SDK
-        uses: actions/setup-dotnet@v4
+        uses: actions/setup-dotnet@v5
         with:
           global-json-file: global.json
       - name: Install JDK 21
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: '21'
       - name: Install MAUI Android workload
         run: |
           dotnet workload install maui-android --skip-manifest-update
-          find "$DOTNET_ROOT/packs" "$DOTNET_ROOT/template-packs" "$DOTNET_ROOT/library-packs" \
-            -name '*.nupkg' -print0 | xargs -0 dotnet nuget verify --all
+          python3 scripts/verify-workload-packages.py
         env:
           DOTNET_NUGET_SIGNATURE_VERIFICATION: 'true'
       - name: Prepare Android SDK
