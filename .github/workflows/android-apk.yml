@@ -8,6 +8,7 @@ on:
       - '.github/workflows/android-apk.yml'
       - 'NuGet.Config'
       - 'scripts/verify-workload-packages.py'
+      - 'scripts/prepare-android-sdk.py'
 
 permissions:
   contents: read
@@ -20,6 +21,8 @@ jobs:
   build:
     runs-on: ubuntu-24.04
     timeout-minutes: 30
+    env:
+      ANDROID_HOME: ${{ runner.temp }}/mathpet-android-sdk
     steps:
       - name: Check out source
         uses: actions/checkout@v5
@@ -40,7 +43,7 @@ jobs:
           DOTNET_NUGET_SIGNATURE_VERIFICATION: 'true'
       - name: Prepare Android SDK
         run: |
-          sdkmanager "platforms;android-36" "build-tools;36.0.0" "platform-tools"
+          python3 scripts/prepare-android-sdk.py
       - name: Verify core rules
         run: dotnet test tests/MathPet.Core.Tests --locked-mode
       - name: Build self-contained development APK
