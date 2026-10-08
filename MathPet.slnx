@@ -1,0 +1,11 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/MathPet.Android/MathPet.Android.csproj" />
+    <Project Path="src/MathPet.Core/MathPet.Core.csproj" />
+    <Project Path="src/MathPet.UI/MathPet.UI.csproj" />
+    <Project Path="src/MathPet.Web/MathPet.Web.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/MathPet.Core.Tests/MathPet.Core.Tests.csproj" />
+  </Folder>
+</Solution>

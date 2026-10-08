@@ -1,0 +1,21 @@
+<div class="gradebar" aria-label="选择年级和学期">
+    @for (var i = 1; i <= 6; i++)
+    {
+        var grade = i;
+        <button class="@(Grade == grade ? "active" : "")" @onclick="() => Changed.InvokeAsync(grade)">@Curriculum.GradeNames[grade-1]年级</button>
+    }
+    @if (ShowSemester)
+    {
+        <select aria-label="学期" value="@Semester" @onchange="OnSemester">
+            <option value="First">上册</option><option value="Second">下册</option>
+        </select>
+    }
+</div>
+@code {
+    [Parameter] public int Grade { get; set; }
+    [Parameter] public Semester Semester { get; set; }
+    [Parameter] public bool ShowSemester { get; set; }
+    [Parameter] public EventCallback<int> Changed { get; set; }
+    [Parameter] public EventCallback<Semester> SemesterChanged { get; set; }
+    private Task OnSemester(ChangeEventArgs e) => SemesterChanged.InvokeAsync(Enum.Parse<Semester>(e.Value?.ToString() ?? "First"));
+}

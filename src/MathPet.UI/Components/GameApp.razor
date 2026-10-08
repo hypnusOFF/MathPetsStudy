@@ -1,0 +1,176 @@
+@namespace MathPet.UI.Components
+@inject GameState Game
+@inject IJSRuntime JS
+@implements IAsyncDisposable
+
+@if (!loaded)
+{
+    <div class="empty"><h1>数学宠物岛</h1><p class="muted">正在准备你和团团的小岛…</p></div>
+}
+else
+{
+<div class="shell">
+<aside class="sidebar">
+    <div class="brand"><span class="brand-icon">✦</span>数学宠物岛</div>
+    <div class="side-caption">LEARN · PLAY · GROW</div>
+    <nav class="nav" aria-label="主导航">
+    @foreach (var nav in Navigation)
+    {
+        <button class="navbtn @(ActiveNav(nav.Page) ? "active" : "")" @onclick="() => Navigate(nav.Page)" aria-current="@(ActiveNav(nav.Page) ? "page" : null)"><span>@nav.Icon</span>@nav.Label</button>
+    }
+    </nav>
+    <div class="side-pet"><b>🌱 每一点进步，都有陪伴</b><p>学会一个新知识，也让你的小伙伴长大一点。</p><button class="btn secondary" @onclick="() => Navigate(View.Pet)">去看看@State.PetName →</button></div>
+</aside>
+<main class="content">
+<header class="topbar"><div><div class="eyebrow">MATH & LITTLE FRIENDS</div><h1>@PageTitle</h1></div><div class="wallet"><span class="coin" data-testid="wallet">✦ @State.Coins 积分</span><span class="avatar">🙂</span></div></header>
+@if (Game.StorageError is not null) { <div class="storage-error" role="alert">@Game.StorageError</div> }
+@switch (view)
+{
+case View.Home:
+    <div class="hero"><div><span class="pill">🌱 学数学 · 养伙伴</span><h2>每一次思考，<br>都让小岛更美好。</h2><p class="muted">从一个知识点开始。@State.PetName 已经准备好，陪你一起学习、挑战和成长。</p><div class="flex"><button class="btn" @onclick="() => Navigate(View.Courses)">开始学习 →</button><button class="btn ghost" @onclick="() => Navigate(View.Pet)">看看@State.PetName</button></div></div><PetPortrait /></div>
+    <div class="section"><h2>我的学习计划</h2><span class="muted tiny">按自己的节奏，一步一步来</span></div>
+    <div class="grid">
+        <div class="card"><span class="icon">▤</span><h3>继续学 · @Topic.Name</h3><p class="muted tiny">@GradeName 年级 · 知识点样例</p><button class="btn secondary" @onclick="OpenLesson">进入课堂</button></div>
+        <div class="card"><span class="icon" style="background:#e9f5ef">✎</span><h3>今天的小练习</h3><p class="muted tiny">3道题 · 不限时 · 今日首次完成额外 +10</p><button class="btn secondary" @onclick="() => Navigate(View.Daily)">开始练习</button></div>
+        <div class="card"><span class="icon" style="background:#fff2d8">⚑</span><h3>挑战知识点关卡</h3><p class="muted tiny">独立思考 · 解锁星星与积分</p><button class="btn secondary" @onclick="() => Navigate(View.Map)">去闯关</button></div>
+    </div>
+    <div class="section"><h2>一起成长</h2></div><div class="two">
+    <div class="card"><div class="row"><div><h3>📚 学习足迹</h3><span class="muted tiny">认真练习，才能逐渐掌握</span></div></div><div class="flex" style="justify-content:space-around;margin-top:20px"><div><div class="stat">@State.CompletedPractices</div><span class="muted tiny">完成练习</span></div><div><div class="stat">@State.Stars.Count</div><span class="muted tiny">通过关卡</span></div><div><div class="stat">@State.Mistakes.Count</div><span class="muted tiny">待复习错题</span></div></div></div>
+    <div class="card"><span class="tag">主宠物 · @State.PetName</span><h3>今天也想和你一起玩！</h3><p class="muted">成长 @State.Growth/100 · @Engine.PetStage</p><div class="progress"><i style="width:@(State.Growth)%"></i></div><button class="btn secondary" @onclick="() => Navigate(View.Pet)">回到宠物家园 →</button></div></div>
+    break;
+case View.Courses:
+    <p class="muted">年级 → 学期 → 单元 → 知识点 → 讲解与练习</p>
+    <GradeSelector Grade="State.Grade" Semester="State.Semester" ShowSemester="true" Changed="ChangeGrade" SemesterChanged="ChangeSemester" />
+    <div class="note">当前为自编样例课程，尚未逐册核对新版人教版教材。每个年级提供一个可体验知识点；示例所在学期仅为界面分组，正式归属待核对。</div>
+    <div class="section"><h2>@GradeName 年级 · @(State.Semester == Semester.First ? "上册" : "下册")</h2><span class="muted tiny">已提供的讲解可自由查看</span></div>
+    @if (State.Semester == Semester.Second)
+    {
+        <div class="card empty"><span class="icon">▤</span><h3>下册课程待编排</h3><p class="muted">先体验知识点学习流程，具体目录将在教材核对后确定。</p><button class="btn" @onclick="() => ChangeSemester(Semester.First)">查看知识点样例</button></div>
+    }
+    else
+    {
+        <div class="card"><div class="row"><div><span class="tag purple">@Topic.Area · 样例单元</span><h3 style="margin-top:12px">@Topic.Name</h3><span class="muted tiny">讲解 · 例题 · 跟着做 · 独立练习 · 闯关</span></div><button class="btn" @onclick="OpenLesson">去学习 →</button></div><div class="row"><span class="muted">知识点状态</span><span class="tag">@MasteryLabel(Engine.GetMastery(Topic))</span></div></div>
+        <div class="card" style="margin-top:15px"><h3>其余单元</h3><p class="muted">将按教材补齐数与运算、图形与几何、统计及综合实践内容。</p><span class="tag purple">内容规划中</span></div>
+    }
+    break;
+case View.Lesson:
+    <button class="btn ghost" @onclick="() => Navigate(View.Courses)">← 课程目录</button>
+    <div class="lesson-steps" aria-label="学习步骤">
+        @for (var i=0; i<LessonSteps.Length; i++) { var index=i; <button class="@(lessonStep==index?"active":"")" @onclick="() => lessonStep=index">@(index+1). @LessonSteps[index]</button> }
+    </div>
+    <div class="card">
+    @switch(lessonStep)
+    {
+        case 0:
+            <span class="tag">本课目标</span><h2>@Topic.Name</h2><p class="big-problem">@Topic.Goal</p><p class="muted">先理解，再练习。提示始终免费，答错也可以继续学习。</p>
+            break;
+        case 1:
+            <h2>@Topic.Name</h2><div class="step">@Topic.Explanation</div><div class="big-problem" style="text-align:center;background:#fff7e7;padding:25px;border-radius:16px">@Topic.Visual</div><p class="muted">常见提醒：@Topic.Questions[0].CommonMistake</p>
+            break;
+        case 2:
+            <span class="tag">分步例题</span><h2>@Topic.Questions[0].Text</h2>
+            @for(var i=0;i<Topic.ExampleSteps.Length;i++) { <details class="step" open="@(i==0)"><summary>第 @(i+1) 步</summary><p>@Topic.ExampleSteps[i]</p></details> }
+            break;
+        case 3:
+            <span class="tag">引导练习</span><h2>@Topic.Questions[1].Text</h2><p class="muted">先想一想应该用什么方法，再展开提示。</p>
+            @for(var i=0;i<Topic.Questions[1].Hints.Length;i++) { <details class="step"><summary>提示 @(i+1)</summary><p>@Topic.Questions[1].Hints[i]</p></details> }
+            <details class="step"><summary>查看完整做法</summary>@foreach(var step in Topic.Questions[1].Solution) { <p>@step</p> }</details>
+            <p class="muted tiny">下一步可以独立输入答案，获得判分和反馈。</p>
+            break;
+        case 4:
+            <h2>自己试一试</h2><p class="muted">完成3道题，不限时，可查看分层提示。</p><button class="btn" @onclick="() => Start(StudyMode.Practice)">开始独立练习 →</button>
+            break;
+        case 5:
+            <h2>准备挑战了吗？</h2><p class="muted">独立答对至少2道题通过本关。使用提示的题目仍有积分，但不计入独立通关题数。</p><button class="btn" @onclick="() => Start(StudyMode.Challenge)">开始知识点闯关 ⚑</button>
+            break;
+    }
+        <div class="flex" style="margin-top:25px;justify-content:space-between"><button class="btn ghost" disabled="@(lessonStep==0)" @onclick="() => lessonStep--">上一步</button>@if(lessonStep<5) {<button class="btn secondary" @onclick="() => lessonStep++">下一步 →</button>}</div>
+    </div>
+    break;
+case View.Daily:
+    <GradeSelector Grade="State.Grade" Changed="ChangeGrade" />
+    <div class="hero"><div><span class="pill">练习模式 · 不限时</span><h2>温习一点，巩固一点。</h2><p class="muted">目前练习当前年级的3道样例题。完整题库上线后，再扩展为当前知识、旧知识和错题的每日组合。</p><button class="btn" @onclick="() => Start(StudyMode.Daily)">开始今日练习 →</button></div><div style="font-size:75px">✎</div></div>
+    <div class="grid" style="margin-top:20px"><div class="card"><h3>当前知识</h3><p class="muted">@Topic.Name</p></div><div class="card"><h3>学习积分</h3><p class="muted">年级系数 @GameEngine.GradeMultipliers[State.Grade-1] · 今日首次完成额外 +10</p></div><div class="card"><h3>错题巩固</h3><p class="muted">@State.Mistakes.Count 道待复习</p><button class="btn secondary" @onclick="() => Navigate(View.Review)">去复习</button></div></div>
+    <div class="note">题目基础分10 × 年级系数 × 难度系数。使用提示奖励为60%，重复做对奖励为30%。答错不扣分。</div>
+    break;
+case View.Map:
+    <GradeSelector Grade="State.Grade" Changed="ChangeGrade" />
+    <div class="hero"><div><span class="pill">知识点 → 单元 → 学期</span><h2>向下一颗星星出发。</h2><p class="muted">先挑战一个知识点。单元和学期综合关待完整题库制作后开放。</p></div><div style="font-size:70px">🏁</div></div>
+    <div class="section"><h2>我的闯关路线</h2><span class="muted tiny">@GradeName 年级 · 年级系数 @GameEngine.GradeMultipliers[State.Grade-1]</span></div>
+    <div class="grid"><div class="card"><span class="icon">1</span><h3>@Topic.Name</h3><p class="muted tiny">3道题 · 独立答对2道通过 · 按题型限时</p><div class="stars">@StarText(State.Stars.GetValueOrDefault(Topic.Id))</div><button class="btn" style="margin-top:18px" @onclick="() => Start(StudyMode.Challenge)">@(State.Stars.ContainsKey(Topic.Id)?"再次挑战":"开始闯关")</button></div><div class="card"><span class="icon">@(State.Stars.ContainsKey(Topic.Id)?"2":"🔒")</span><h3>单元综合关</h3><p class="muted">@(State.Stars.ContainsKey(Topic.Id)?"前置条件已达成，题目待制作。":"通过知识点关卡后解锁。")</p><button class="btn ghost" disabled>内容待制作</button></div><div class="card"><span class="icon">🔒</span><h3>学期综合关</h3><p class="muted">通过本学期单元综合关后解锁。</p><button class="btn ghost" disabled>尚未开放</button></div></div>
+    <div class="note">时限为初始值：基础计算30秒，分数题45秒，应用题60秒。超时后仍能作答，只失去速度奖励，不影响正确答案获得积分。退出后已获得的题目积分保留。</div>
+    break;
+case View.Quiz:
+    @if(quiz is not null)
+    {
+        <div class="flex" style="justify-content:space-between"><button class="btn ghost" @onclick="() => Navigate(View.Home)">← 退出练习</button><span class="tag purple">第 @(quiz.Index+1) / @quiz.Questions.Count 题</span><span class="muted tiny">@if(quiz.Mode==StudyMode.Challenge){<span>⏱ <span class="timer" data-testid="timer">@(quiz.TimedOut?"已超时 · 可继续作答":$"{quiz.RemainingSeconds}秒")</span></span>}else{<span>不限时 · 可以慢慢想</span>}</span></div>
+        <div class="progress"><i style="width:@(quiz.Index*100/quiz.Questions.Count)%"></i></div>
+        <div class="card" style="margin-top:20px"><span class="tag">@Curriculum.GradeNames[quiz.Topic.Grade-1]年级 · @quiz.Topic.Name</span>
+        @if(quiz.Mode==StudyMode.Review){<p class="muted tiny">这是一道相似题。独立答对后，可移除对应错题；用提示做对则保留，方便再巩固。</p>}
+        <div class="big-problem" data-testid="question">@quiz.Current.Text</div>
+        <form class="answer-form" @onsubmit="Submit" @onsubmit:preventDefault>
+            <label class="muted tiny" for="answer">@(quiz.Topic.Grade==5?"请输入分数，如5/6；等值分数也可":"请输入数字，题目中的单位可省略")</label><br>
+            <input id="answer" class="answer" @bind="answerText" @bind:event="oninput" autocomplete="off" maxlength="100" placeholder="写下你的答案" disabled="@quiz.Answered" @ref="answerInput" />
+            @if(answerError is not null){<p class="error-text" role="alert">@answerError</p>}
+            <div class="flex"><button type="submit" class="btn" disabled="@quiz.Answered" data-testid="submit-answer">提交答案</button><button type="button" class="btn secondary" disabled="@(quiz.Answered || quiz.HintCount>=quiz.Current.Hints.Length)" @onclick="Hint">💡 给我一点提示</button></div>
+        </form>
+        @foreach(var hint in revealedHints){<div class="step">💡 @hint</div>}
+        @if(quiz.Answered && quiz.LastResult is { } result)
+        {
+            <div class="feedback @(result.Correct?"":"bad")" role="status" data-testid="answer-feedback"><b>@(result.Correct?$"答对啦！ +{result.Points} 积分":"这次还差一点，看看怎么做。")</b><p>你的答案：@result.Submitted</p><p>解题思路：</p>@foreach(var step in result.Question.Solution){<p>@step</p>}@if(!result.Correct){<p>常见错误：@result.Question.CommonMistake</p>}<span class="tiny">@(result.Correct?"认真思考比速度更重要。":"已加入错题复习，答错不会扣积分。")</span></div>
+            <button class="btn" @onclick="Next" data-testid="next-question">@(quiz.Index<quiz.Questions.Count-1?"下一题 →":"查看结算 →")</button>
+        }
+        </div>
+    }
+    break;
+case View.Result:
+    @if(summary is not null)
+    {
+        <div class="card empty"><div style="font-size:60px">@(summary.Mode==StudyMode.Challenge?(summary.Passed?"🏆":"🌱"):"🎉")</div><h2>@(summary.Mode==StudyMode.Challenge?(summary.Passed?"挑战成功！":"再巩固一下就更好了"):"练习完成！")</h2><p class="muted">答对 @summary.Correct / @summary.Total 道 · @summary.TopicName</p>@if(summary.Mode==StudyMode.Challenge){<div class="stars">@StarText(summary.Stars)</div>}<div class="stat" style="color:var(--purple)">+@(summary.QuestionPoints+summary.CompletionBonus) 积分</div><p class="muted tiny">题目奖励 @summary.QuestionPoints · 完成奖励 @summary.CompletionBonus<br>@State.PetName 成长 +@summary.GrowthGained</p><p class="muted tiny">@(summary.Mode==StudyMode.Review?"独立答对相似题后移除错题；使用提示后仍保留以便复习。":"错题已保存。通过关卡后继续复习，才能巩固掌握。")</p><div class="flex" style="justify-content:center;margin-top:25px"><button class="btn" @onclick="() => Navigate(View.Pet)">去照顾@State.PetName ♡</button><button class="btn secondary" @onclick="() => Navigate(View.Review)">复习错题</button><button class="btn ghost" @onclick="() => Navigate(View.Home)">回到首页</button></div></div>
+    }
+    break;
+case View.Review:
+    <p class="muted">先看懂错在哪里，再用相似题独立练习。使用提示做对不会立即移除错题。</p>
+    @if(State.Mistakes.Count==0){<div class="card empty"><div style="font-size:55px">🌿</div><h2>这里暂时没有错题</h2><p class="muted">练习中答错的题目会自动来到这里。</p><button class="btn" @onclick="() => Navigate(View.Daily)">去做每日练习</button></div>}
+    @foreach(var mistake in State.Mistakes.ToList())
+    {
+        var question=Curriculum.FindQuestion(mistake.QuestionId);
+        @if(question is not null){<div class="card" style="margin-top:15px" @key="mistake.QuestionId"><span class="tag purple">@Curriculum.GradeNames[question.Grade-1]年级 · 待巩固</span><h3>@question.Text</h3><p class="muted tiny">上次答案：@mistake.LastAnswer · 错误 @mistake.WrongCount 次</p><details class="step"><summary>查看解题思路</summary>@foreach(var step in question.Solution){<p>@step</p>}<p>常见错误：@question.CommonMistake</p></details><button class="btn secondary" @onclick="() => Start(StudyMode.Review,mistake.QuestionId)">试试相似题</button></div>}
+    }
+    break;
+case View.Pet:
+    <div class="two"><div class="card"><div class="flex" style="justify-content:space-between;margin-bottom:15px"><div><span class="tag">我的主宠物</span><h2 style="margin:9px 0">@State.PetName <span class="muted" style="font-size:14px">@Engine.PetStage</span></h2></div><div class="flex"><button class="btn ghost" @onclick="Rename">改名字</button><button class="btn ghost" @onclick="() => Navigate(View.Growth)">成长册 →</button></div></div>
+        <div class="pet-scene" style="@(State.UsingRoom?"background:linear-gradient(#f4e9fc 0%,#f9f0ea 70%,#ede1f5 70%)":null)"><div class="bubble">@(State.WearingRibbon?"🎀 今天戴上了新蝴蝶结！":"今天想和你一起学数学！")</div><PetPortrait />@if(State.WearingRibbon){<span class="pet-ribbon">🎀</span>}@if(State.UsingRoom){<span class="room-flower">🌷</span>}</div>
+        <div class="flex" style="justify-content:center;margin-top:18px"><button class="btn secondary" @onclick="Feed" data-testid="feed">🍎 喂食 (@State.Food)</button><button class="btn secondary" @onclick="Play">🧶 玩耍</button><button class="btn secondary" @onclick="Care">✨ 清洁 / 抚摸</button></div></div>
+    <div><div class="card"><h3 style="margin-top:0">@State.PetName 的状态</h3>@foreach(var stat in new[]{("饱腹",State.Fullness,"#dfb066"),("心情",State.Mood,"#8cb7a2"),("成长",State.Growth,"#a28ae8")}){<div class="row" style="display:block"><div class="flex" style="justify-content:space-between"><span>@stat.Item1</span><span class="muted tiny">@stat.Item2 / 100</span></div><div class="progress"><i style="width:@(stat.Item2)%;background:@stat.Item3"></i></div></div>}<p class="muted tiny">不会死亡，成长不会倒退。饱腹最低30，心情最低40，离开几天也没关系。</p></div>
+        <div class="card" style="margin-top:18px"><div class="flex"><button class="btn gold" @onclick="() => Navigate(View.Shop)">小岛商店</button><button class="btn ghost" @onclick="() => Navigate(View.Bag)">我的背包</button></div><p class="muted tiny">用学习积分购买食物、玩具和装饰。</p></div></div></div>
+    <div class="section"><h2>宠物收藏</h2><span class="muted tiny">第一版先与一只伙伴建立陪伴</span></div><div class="grid"><div class="card"><h3>🐱 @State.PetName · 奶油猫</h3><span class="tag">当前主宠物</span></div><div class="card"><h3>🐰 绒绒 · 小白兔</h3><p class="muted tiny">后续内容：完成学习成就解锁。</p><button class="btn ghost" disabled>尚未开放</button></div><div class="card"><h3>🐧 点点 · 小企鹅</h3><p class="muted tiny">后续内容：完成学习成就解锁。</p><button class="btn ghost" disabled>尚未开放</button></div></div>
+    break;
+case View.Shop:
+case View.Bag:
+    <div class="flex"><button class="btn ghost" @onclick="() => Navigate(View.Pet)">← 宠物家园</button><button class="btn secondary" @onclick="() => Navigate(view==View.Shop?View.Bag:View.Shop)">@(view==View.Shop?"查看背包":"去商店")</button></div><p class="muted">把每一点学习收获，变成@State.PetName 的小小快乐。</p>
+    <div class="grid shop">@foreach(var item in GameEngine.Shop)
+    {
+        <div class="card shop-item"><div class="emoji">@item.Icon</div><h3>@item.Name</h3><p class="muted tiny">@item.Description</p>
+        @if(view==View.Shop){<p class="coin">✦ @item.Price 积分</p><button class="btn @(item.Kind==ItemKind.Food?"gold":"secondary")" disabled="@(State.Coins<item.Price || item.Kind!=ItemKind.Food && Engine.Owns(item.Kind))" @onclick="() => Buy(item.Kind)">@(item.Kind!=ItemKind.Food && Engine.Owns(item.Kind)?"已拥有":"购买")</button>}
+        else {<p class="muted">拥有 @(item.Kind==ItemKind.Food?State.Food:Engine.Owns(item.Kind)?1:0) @(item.Kind==ItemKind.Food?"份":"件")</p><button class="btn secondary" disabled="@(!Engine.Owns(item.Kind))" @onclick="() => Use(item.Kind)">@UseLabel(item.Kind)</button>}
+        </div>
+    }</div><div class="note">积分不会因答错扣除。低年级也能负担基础食物，高年级积分更多，可用于丰富家园。所有物品与进度保存在本设备。</div>
+    break;
+case View.Growth:
+    <button class="btn ghost" @onclick="() => Navigate(View.Pet)">← 宠物家园</button><div class="hero" style="margin-top:20px"><div><span class="pill">@State.PetName 的成长故事</span><h2>一起学习，一起长大。</h2><p class="muted">答对题目和喂食积累成长，成长阶段也需要学习成就。各年级都能达成，无需挑战高年级课程。</p></div><PetPortrait /></div>
+    <div class="section"><h2>成长阶段</h2><span class="muted tiny">当前：@Engine.PetStage</span></div><div class="grid"><div class="card"><span class="tag">已到达</span><h3>幼宠</h3><p class="muted">初次见面，陪你开始学习。</p></div><div class="card"><span class="tag">@(Engine.PetStage!="幼宠"?"已到达":"待解锁")</span><h3>成长宠</h3><p class="muted">成长达到50，并完成一次练习。</p><p class="muted tiny">成长 @State.Growth/50 · 练习 @(State.CompletedPractices>0?"已完成":"未完成")</p></div><div class="card"><span class="tag">@(Engine.PetStage=="成熟宠"?"已到达":"待解锁")</span><h3>成熟宠</h3><p class="muted">成长达到100，通过任一关卡，并完成两次练习或独立完成一次错题复习。</p><p class="muted tiny">通关 @(State.Stars.Count>0?"✓":"待完成") · 巩固 @(State.ReviewedMistakes>0 || State.CompletedPractices>=2?"✓":"待完成")</p></div></div>
+    <div class="section"><h2>学习成就</h2></div><div class="card"><div class="row"><span>✦ 第一次知识点通关</span><span class="tag">@(State.Stars.Count>0?"已获得":"继续加油")</span></div><div class="row"><span>✎ 完成一次日常练习</span><span class="tag">@(State.CompletedPractices>0?"已获得":"继续加油")</span></div><div class="row"><span>↺ 独立答对一题相似题</span><span class="tag">@(State.ReviewedMistakes>0?"已获得":"继续加油")</span></div><p class="muted tiny">成长动画、纪念装饰和更多宠物将在后续版本扩展。</p></div>
+    break;
+}
+<div class="footer">数学宠物岛 v0.1 · 离线学习版 · 人教版课程结构示意<br>6个知识点 · 18道练习题 + 18道相似题 · 完整教材目录与题库待核对<br><button @onclick="Reset">重置本机进度</button></div>
+</main></div>
+@if(toast is not null){<div class="toast" role="status">@toast</div>}
+@if(modalTitle is not null)
+{
+<div class="modal" @onkeydown="ModalKey"><div class="card" role="dialog" aria-modal="true" aria-labelledby="modal-title" tabindex="-1" @ref="modalElement"><h2 id="modal-title">@modalTitle</h2><p class="muted">@modalText</p>
+@if(renaming){<label for="pet-name">宠物名字（1～12个字符）</label><input id="pet-name" class="name-input" maxlength="12" @bind="newPetName" @bind:event="oninput" />}
+@if(modalError is not null){<p class="error-text" role="alert">@modalError</p>}
+<div class="flex modal-actions"><button class="btn ghost" @onclick="CancelModal">取消</button><button class="btn" @onclick="ConfirmModal" disabled="@modalBusy">@(modalBusy?"处理中…":modalButton)</button></div></div></div>
+}
+}

@@ -1,0 +1,6 @@
+@page "/"
+@using Microsoft.AspNetCore.Components.Web
+@using MathPet.UI.Components
+@namespace MathPet.Web
+<!DOCTYPE html>
+<html lang="zh-CN"><head><meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" /><base href="/" /><title>数学宠物岛</title><link rel="stylesheet" href="_content/MathPet.UI/app.css" /><HeadOutlet /></head><body><GameApp @rendermode="new InteractiveServerRenderMode(prerender:false)" /><script src="_content/MathPet.UI/storage.js"></script><script src="_framework/blazor.web.js"></script></body></html>
