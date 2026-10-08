@@ -74,3 +74,9 @@ bash scripts/build-android.sh
 ```
 
 云环境已在 `scripts/cloud-env.sh` 配置相关路径；生成的开发密钥放在仓库外，勿删除，否则后续 APK 无法原位更新已有安装。NuGet 配置要求包签名，依赖锁文件用于重复构建。`test` 和旧 `.vscode` 文件是原仓库保留的控制台示例，不是安卓项目入口。
+
+## 从 GitHub 下载体验包
+
+在仓库 **Actions → Android APK download** 中，打开成功的运行记录，在页面下方 **Artifacts** 下载 `mathpet-0.1.0-android`。下载的是 ZIP，解压后安装 APK。私有仓库需要登录你的 GitHub 账号才能下载，附件保留30天，过期后可点击 Run workflow 重新构建。
+
+此自动构建使用 GitHub 临时机器上的开发签名，与云环境生成的签名不同，也不上传云端签名密钥。自动构建生成的体验包可能不能覆盖安装之前其他签名的版本；首次安装不受影响。正式更新渠道需要稳定、安全保存的签名。
