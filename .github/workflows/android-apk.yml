@@ -45,9 +45,11 @@ jobs:
         run: |
           python3 scripts/prepare-android-sdk.py
       - name: Verify core rules
-        run: dotnet test tests/MathPet.Core.Tests --locked-mode
+        run: |
+          python3 scripts/ci-command.py dotnet restore tests/MathPet.Core.Tests/MathPet.Core.Tests.csproj --locked-mode
+          python3 scripts/ci-command.py dotnet test tests/MathPet.Core.Tests/MathPet.Core.Tests.csproj --no-restore
       - name: Build self-contained development APK
-        run: bash scripts/build-android.sh
+        run: python3 scripts/ci-command.py bash scripts/build-android.sh
         env:
           MATHPET_KEY_DIR: ${{ runner.temp }}/mathpet-dev-keys
       - name: Upload downloadable APK archive

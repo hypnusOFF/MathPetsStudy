@@ -50,7 +50,8 @@ source scripts/cloud-env.sh
 运行测试和网页验证版：
 
 ```bash
-dotnet test tests/MathPet.Core.Tests --locked-mode
+dotnet restore tests/MathPet.Core.Tests --locked-mode
+dotnet test tests/MathPet.Core.Tests --no-restore
 dotnet run --project src/MathPet.Web --urls http://127.0.0.1:8766
 ```
 
