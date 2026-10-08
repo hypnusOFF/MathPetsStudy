@@ -6,6 +6,8 @@ on:
     branches: [main]
     paths:
       - '.github/workflows/android-apk.yml'
+      - 'NuGet.Config'
+      - 'scripts/verify-workload-packages.py'
 
 permissions:
   contents: read
