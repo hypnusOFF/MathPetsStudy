@@ -36,6 +36,8 @@ public partial class GameApp
     private IReadOnlyList<Topic> SemesterTopics => Curriculum.ForSemester(State.Grade, State.Semester);
     private Topic Topic => SemesterTopics.FirstOrDefault(t => t.Id == selectedTopicId) ?? SemesterTopics[0];
     private string GradeName => Curriculum.GradeNames[State.Grade-1];
+    private PetPortrait? petPortrait;
+    private string VisualStage => Engine.PetStage switch { "成熟宠" => "mature", "成长宠" => "young", _ => "baby" };
     private string PageTitle => view switch
     {
         View.Home=>"今天，也进步一点点",View.Courses=>"学习课堂",View.Lesson=>"一起来学新知识",
@@ -108,9 +110,15 @@ public partial class GameApp
         summary=quiz.Finish();view=View.Result;StopTimer();await Game.SaveAsync();
         await JS.InvokeVoidAsync("mathPet.scrollTop");
     }
-    private async Task Feed(){var text=Engine.Feed();await Game.SaveAsync();Notify(text);}
-    private async Task Play(){var text=Engine.Play();await Game.SaveAsync();Notify(text);}
-    private async Task Care(){var text=Engine.Care();await Game.SaveAsync();Notify(text);}
+    private async Task Feed()
+    {
+        var food=State.Food; var stage=VisualStage; var text=Engine.Feed();
+        await Game.SaveAsync(); Notify(text);
+        if(view==View.Pet && petPortrait is not null && State.Food<food && stage==VisualStage)
+            await petPortrait.PlayAsync("feed");
+    }
+    private async Task Play(){var text=Engine.Play();await Game.SaveAsync();Notify(text);if(view==View.Pet && petPortrait is not null)await petPortrait.PlayAsync("play");}
+    private async Task Care(){var text=Engine.Care();await Game.SaveAsync();Notify(text);if(view==View.Pet && petPortrait is not null)await petPortrait.PlayAsync("pet");}
     private async Task Buy(ItemKind kind){var result=Engine.Buy(kind);await Game.SaveAsync();Notify(result.Message);}
     private string UseLabel(ItemKind kind)=>kind switch
     {ItemKind.Food=>"喂给"+State.PetName,ItemKind.Toy=>"一起玩",ItemKind.Ribbon=>State.WearingRibbon?"摘下":"戴上",_=>State.UsingRoom?"恢复默认小屋":"布置家园"};

@@ -10,7 +10,7 @@ C# 开发的离线安卓数学学习游戏。使用 .NET 10、.NET MAUI 和 Blaz
 - 精确识别整数、小数和等值分数，支持全角数字；可以省略题目单位，填写单位时必须匹配。
 - 错题自动保存，相似题独立答对后移除，使用提示仍有积分但不立即移除错题。
 - 按年级、难度奖励积分，重复做对和使用提示奖励递减，答错不扣分。
-- 一只主宠物：改名、喂食、玩耍、清洁/抚摸、成长阶段、学习成就。
+- 一只主宠物：改名、喂食、玩耍、清洁/抚摸、成长阶段、学习成就。已换为毛绒原画透明素材，接入呼吸、喂食、玩耍、抚摸及成长进化动画。
 - 商店、背包、食物、永久玩具、蝴蝶结穿戴和家园装饰切换。
 - 安卓本地 JSON 存档，原子替换；异常存档保留并备份，界面提示，不会自动覆盖。卸载/清除应用数据会失去本地进度。
 
@@ -28,7 +28,7 @@ python3 scripts/generate-question-bank.py --check
 
 ## 安装到安卓设备
 
-新增宠物资源第一版：三只宠物的九种成长形态、九件换装、十四个道具/状态图标、三套家园和八种动画状态。可以保存 [离线资源预览](src/MathPet.UI/wwwroot/pet-assets/gallery.html) 后在浏览器打开；生成、打包与接入约定见 [宠物资源说明](docs/pet-assets.md)。这批完成资源准备，三宠物独立培养尚待接入。
+宠物美术已改为确认后的毛绒绘本风，九张透明角色与八种动作状态已经制作。用 `python3 scripts/package-pet-motion.py` 生成可离线打开的 `artifacts/mathpet-motion-preview.html`，或从 GitHub Actions 下载 `mathpet-pet-motion` 产物。详见 [动作资源说明](docs/pet-motion.md) 和 [已确认的美术方向](docs/pet-art-direction.md)。应用已接入主猫的照顾互动；三宠物独立培养、独立表情与新换装仍待实现。旧版 [SVG 资源页](src/MathPet.UI/wwwroot/pet-assets/gallery.html) 保留作历史版本。
 
 构建产物：`artifacts/mathpet-0.1.0.apk`（开发签名，包含程序集，可独立安装，不需要电脑或网络运行）。最低 Android 7.0 / API 24；包含 ARM64 和 x86_64，适合多数现代手机与对应模拟器，暂不包含仅支持32位ARM的旧设备。需要设备具有可用的 Android System WebView。
 

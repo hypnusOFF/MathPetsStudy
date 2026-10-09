@@ -15,6 +15,10 @@ on:
       - 'scripts/prepare-android-sdk.py'
       - 'scripts/generate-pet-assets.py'
       - 'scripts/package-pet-assets.py'
+      - 'scripts/package-pet-motion.py'
+      - 'scripts/layout-pet-sprites.py'
+      - 'scripts/pet-motion-preview.template.html'
+      - 'docs/pet-motion.md'
       - 'docs/pet-assets.md'
       - 'docs/pet-concept.png'
 
@@ -43,6 +47,19 @@ jobs:
           path: |
             artifacts/mathpet-pet-assets.zip
             artifacts/mathpet-pet-preview.html
+          if-no-files-found: error
+          retention-days: 30
+      - name: Package approved plush pet motion
+        run: |
+          python3 scripts/layout-pet-sprites.py
+          python3 scripts/package-pet-motion.py
+      - name: Upload plush pet motion and offline preview
+        uses: actions/upload-artifact@v4
+        with:
+          name: mathpet-pet-motion
+          path: |
+            artifacts/mathpet-motion-assets.zip
+            artifacts/mathpet-motion-preview.html
           if-no-files-found: error
           retention-days: 30
       - name: Install .NET SDK

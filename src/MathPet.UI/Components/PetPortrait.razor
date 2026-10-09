@@ -1,1 +1,66 @@
-<div class="pet-art"><svg viewBox="0 0 200 210" aria-label="团团，一只奶油色的小猫" role="img"><ellipse cx="100" cy="190" rx="57" ry="9" fill="#baa7c3" opacity=".25"/><path d="M143 154 Q190 126 177 171 Q173 186 146 178" fill="#f3cea3" stroke="#805e53" stroke-width="3"/><ellipse cx="100" cy="153" rx="46" ry="40" fill="#ffe1b8" stroke="#805e53" stroke-width="3"/><path d="M47 70 L49 24 Q66 25 83 54 M119 54 Q139 22 154 24 L155 75" fill="#ffe1b8" stroke="#805e53" stroke-width="3"/><path d="M56 54 L57 34 L72 51 M130 51 L146 33 L147 55" fill="#f2b3ae"/><ellipse cx="101" cy="91" rx="63" ry="52" fill="#ffe1b8" stroke="#805e53" stroke-width="3"/><path d="M88 42 L93 59 M102 40 L104 58 M116 43 L115 59" stroke="#e5b57c" stroke-width="5" stroke-linecap="round"/><ellipse cx="73" cy="89" rx="5" ry="7" fill="#574447"/><ellipse cx="128" cy="89" rx="5" ry="7" fill="#574447"/><ellipse cx="59" cy="106" rx="11" ry="6" fill="#eeafa1"/><ellipse cx="143" cy="106" rx="11" ry="6" fill="#eeafa1"/><path d="M96 101 Q101 106 106 101 M101 106 Q94 116 89 108 M101 106 Q107 117 114 108" fill="none" stroke="#805e53" stroke-width="3" stroke-linecap="round"/><path d="M67 147 Q75 163 79 147 M123 147 Q128 163 135 146" stroke="#805e53" stroke-width="3" fill="none" stroke-linecap="round"/><ellipse cx="77" cy="182" rx="17" ry="8" fill="#ffe1b8" stroke="#805e53" stroke-width="3"/><ellipse cx="123" cy="182" rx="17" ry="8" fill="#ffe1b8" stroke="#805e53" stroke-width="3"/><path d="M82 132 L101 143 L119 132" fill="none" stroke="#9983d9" stroke-width="8"/><circle cx="101" cy="143" r="7" fill="#edbd64"/></svg></div>
+@implements IDisposable
+<div class="pet-art" style="animation:none">
+    <div class="pet-motion" data-action="@action" data-motion="@(ReducedMotion ? "reduced" : "full")" style="--pet-duration:@(Duration(action))ms" @key="serial">
+        <span class="pet-shadow" aria-hidden="true"></span>
+        <img class="pet-sprite sprite-@(Species)-@(Stage)" src="@Sprite(Stage)" alt="@Name" draggable="false" />
+        @if (action == "evolve" && previousStage is not null)
+        {
+            <img class="pet-sprite pet-old sprite-@(Species)-@(previousStage)" src="@Sprite(previousStage)" alt="" aria-hidden="true" draggable="false" />
+        }
+        <span class="pet-ring" aria-hidden="true"></span>
+        <span class="pet-effect pet-heart" aria-hidden="true">♥</span>
+        <span class="pet-effect pet-star" aria-hidden="true">✦</span>
+        <img class="pet-effect pet-food" src="_content/MathPet.UI/pet-assets/items/apple.svg" alt="" aria-hidden="true" />
+        <img class="pet-effect pet-toy" src="_content/MathPet.UI/pet-assets/items/ball.svg" alt="" aria-hidden="true" />
+    </div>
+</div>
+@code {
+    [Parameter] public string Species { get; set; } = "cat";
+    [Parameter] public string Stage { get; set; } = "baby";
+    [Parameter] public string Name { get; set; } = "团团猫";
+    [Parameter] public bool ReducedMotion { get; set; }
+    private string action = "idle";
+    private string? lastStage, lastSpecies, previousStage;
+    private int serial;
+    private bool disposed;
+    private CancellationTokenSource? playback;
+    private string Sprite(string stage) => $"_content/MathPet.UI/pet-animation/sprites/{Species}-{stage}.png";
+    private static int Duration(string value) => value switch
+    { "pet" => 1400, "feed" or "play" => 2200, "correct" => 1500, "encourage" => 1600, "upgrade" => 2000, "evolve" => 2600, _ => 0 };
+    protected override async Task OnParametersSetAsync()
+    {
+        if (Species is not ("cat" or "rabbit" or "fox") || Stage is not ("baby" or "young" or "mature"))
+            throw new ArgumentException("Unknown pet species or evolution stage.");
+        var oldStage = lastStage;
+        var changedSpecies = lastSpecies != Species;
+        lastStage = Stage; lastSpecies = Species;
+        if (changedSpecies) { playback?.Cancel(); action = "idle"; previousStage = null; }
+        else if (oldStage is not null && oldStage != Stage)
+        {
+            previousStage = oldStage;
+            await PlayAsync("evolve");
+        }
+    }
+    public async Task PlayAsync(string value)
+    {
+        if (disposed) return;
+        var duration = Duration(value);
+        if (duration == 0) throw new ArgumentException("Unknown pet animation.");
+        playback?.Cancel();
+        var current = new CancellationTokenSource(); playback = current;
+        action = value; serial++;
+        await InvokeAsync(StateHasChanged);
+        try
+        {
+            await Task.Delay(duration, current.Token);
+            if (!disposed && playback == current)
+            {
+                action = "idle"; previousStage = null; serial++;
+                await InvokeAsync(StateHasChanged);
+            }
+        }
+        catch (OperationCanceledException) { }
+        finally { if (playback == current) playback = null; current.Dispose(); }
+    }
+    public void Dispose() { disposed = true; playback?.Cancel(); }
+}

@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="zh-CN">
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>数学宠物岛 · 动作预览</title>
+<style>
+__MOTION_CSS__
+*{box-sizing:border-box}body{margin:0;background:#fbf7f0;color:#59444d;font:15px/1.65 system-ui,sans-serif}main{max-width:1080px;margin:auto;padding:32px 24px 60px}h1{font-size:29px;margin:5px 0}h2{font-size:21px;margin:32px 0 12px}p{color:#94838b}.lab{display:grid;grid-template-columns:1.3fr 1fr;gap:24px}.scene{border:1px solid #eee0dd;background:radial-gradient(ellipse at 50% 42%,#fffdf8,#f5eceb);border-radius:30px;min-height:420px;display:grid;place-items:center;position:relative}.scene .pet-motion{width:340px;max-width:95%}.panel{background:white;border:1px solid #eee0dd;border-radius:24px;padding:22px}label{display:block;color:#8b758a;font-size:12px;font-weight:600;margin-top:16px}.buttons{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}button{font:inherit;border:1px solid #e1d6ea;background:#f3edf8;color:#795f91;border-radius:12px;padding:8px 12px;cursor:pointer}button.active{background:#967bb6;color:white}button:disabled{opacity:.45;cursor:default}button:focus-visible,input:focus-visible{outline:3px solid #c4aee3;outline-offset:2px}.status{background:#faf4e8;border-radius:12px;padding:12px;font-size:13px;min-height:68px;margin-top:15px}.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}.card{background:white;border:1px solid #eee0dd;border-radius:22px;text-align:center;padding:12px}.card .pet-motion{width:100%;max-width:220px;margin:auto}.card small{display:block;color:#9b8494}.note{font-size:12px}.caption{position:absolute;bottom:16px;left:0;right:0;text-align:center;color:#998398;font-size:12px}@media(max-width:700px){main{padding:22px 16px 50px}h1{font-size:24px}.lab{grid-template-columns:1fr}.scene{min-height:340px}.scene .pet-motion{width:285px}.grid{gap:8px}.card{padding:7px}.card .pet-motion{max-width:145px}.card strong{font-size:12px}}
+</style>
+<main><h1>小伙伴，动起来。</h1><p>保留原画的毛绒感，用轻柔动作回应每一次互动。</p>
+<div class="lab"><div class="scene"><div id="actor"></div><div class="caption" id="caption"></div></div><div class="panel">
+<label>选择伙伴</label><div class="buttons" id="species"></div><label>成长阶段</label><div class="buttons" id="stages"></div><label>互动动作</label><div class="buttons" id="actions"></div>
+<label><input type="checkbox" id="reduced"> 减少动画</label><div class="status" id="status" role="status" aria-live="polite">正在轻轻呼吸，选择一个互动试试看。</div>
+<p class="note">点击宠物也可以摸摸。动作结束自动回到待机；最终进化后不再继续变形。</p></div></div>
+<h2>九种成长形态</h2><div class="grid" id="catalog"></div>
+<p class="note">第一版为透明角色整图动作与互动特效，尚未制作独立眨眼、咀嚼及耳尾骨骼动作。幼年没有配饰，初次进化增加小配饰，最终进化出现毛纹。此页为动作预览，三只宠物独立存档仍待接入。</p></main>
+<script>
+const D=__PAYLOAD__;let species='rabbit',stage='baby',action='idle',oldStage=null,busy=false,timer=null;
+const $=id=>document.getElementById(id), sprites=D.sprites;
+function add(text,value,parent,fn){const b=document.createElement('button');b.textContent=text;b.dataset.value=value;b.onclick=fn;$(parent).append(b)}
+function reset(){clearTimeout(timer);busy=false;action='idle';oldStage=null}
+function draw(){
+ const root=document.createElement('div');root.className='pet-motion';root.dataset.action=action;root.dataset.motion=$('reduced').checked?'reduced':'full';root.style.setProperty('--pet-duration',(D.actions.find(a=>a.id===action).durationMs||2000)+'ms');
+ root.innerHTML='<span class="pet-shadow"></span><img class="pet-sprite sprite-'+species+'-'+stage+'" alt="'+D.species[species]+'" src="'+sprites[species+'-'+stage]+'">'+(oldStage?'<img class="pet-sprite pet-old sprite-'+species+'-'+oldStage+'" alt="" src="'+sprites[species+'-'+oldStage]+'">':'')+'<span class="pet-ring"></span><span class="pet-effect pet-heart">♥</span><span class="pet-effect pet-star">✦</span><img class="pet-effect pet-food" alt="" src="'+D.food+'"><img class="pet-effect pet-toy" alt="" src="'+D.toy+'">';
+ root.onclick=()=>act('pet');root.querySelectorAll('.pet-effect,.pet-ring,.pet-shadow,.pet-old').forEach(el=>el.setAttribute('aria-hidden','true'));$('actor').replaceChildren(root);
+ for(const [id,value]of [['species',species],['stages',stage],['actions',action]])for(const b of $(id).children){b.classList.toggle('active',b.dataset.value===value);if(id==='actions')b.disabled=busy||(b.dataset.value==='evolve'&&stage==='mature')}
+ $('caption').textContent=D.species[species]+' · '+D.stages[stage];
+}
+function act(id){if(busy||id==='evolve'&&stage==='mature')return;reset();if(id==='idle'){draw();return}const a=D.actions.find(a=>a.id===id);action=id;busy=true;if(id==='evolve'){oldStage=stage;stage=stage==='baby'?'young':'mature'}draw();$('status').textContent=a.description;timer=setTimeout(()=>{reset();draw();$('status').textContent='动作完成，回到呼吸待机。'},a.durationMs)}
+for(const [id,name]of Object.entries(D.species))add(name,id,'species',()=>{reset();species=id;draw();$('status').textContent='已切换伙伴。'});
+for(const [id,name]of Object.entries(D.stages))add(name,id,'stages',()=>{reset();stage=id;draw();$('status').textContent='已切换成长阶段。'});
+for(const a of D.actions)add(a.name,a.id,'actions',()=>act(a.id));
+$('reduced').checked=matchMedia('(prefers-reduced-motion: reduce)').matches;$('reduced').onchange=draw;
+for(const kind of Object.keys(D.species))for(const s of Object.keys(D.stages)){const div=document.createElement('div');div.className='card';div.innerHTML='<div class="pet-motion"><img class="pet-sprite sprite-'+kind+'-'+s+'" alt="'+D.species[kind]+' '+D.stages[s]+'" src="'+sprites[kind+'-'+s]+'"></div><strong>'+D.species[kind]+'</strong><small>'+D.stages[s]+'</small>';$('catalog').append(div)}
+draw();
+</script></html>

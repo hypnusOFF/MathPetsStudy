@@ -1,0 +1,218 @@
+{
+  "version": 1,
+  "species": {
+    "cat": "团团猫",
+    "rabbit": "糯糯兔",
+    "fox": "星星狐"
+  },
+  "stages": {
+    "baby": "幼年期",
+    "young": "初次进化",
+    "mature": "最终进化"
+  },
+  "sprites": [
+    {
+      "id": "cat-baby",
+      "path": "sprites/cat-baby.png",
+      "sha256": "57ebd04216526e96f01559fac0159ace7cf3f4bdc0474d63a9bd745eb28d5560",
+      "size": [
+        1254,
+        1254
+      ],
+      "alphaBounds": [
+        31,
+        103,
+        1242,
+        1163
+      ],
+      "boundsAlphaThreshold": 32,
+      "generation": "exec-033608fd-7673-4ef3-9ef2-228288f28502"
+    },
+    {
+      "id": "cat-young",
+      "path": "sprites/cat-young.png",
+      "sha256": "d9b269539ac6dfc2d82eb72965988c5cef0a121322903a42a57f46a96ea0b9b7",
+      "size": [
+        1254,
+        1254
+      ],
+      "alphaBounds": [
+        53,
+        91,
+        1230,
+        1152
+      ],
+      "boundsAlphaThreshold": 32,
+      "generation": "exec-ff090aa5-6557-4fb2-9efa-9c5989726168"
+    },
+    {
+      "id": "cat-mature",
+      "path": "sprites/cat-mature.png",
+      "sha256": "469f3ea360d30baa1d46a66eac9c9920920de8a53d09726f9c97bf5107c1ce79",
+      "size": [
+        1254,
+        1254
+      ],
+      "alphaBounds": [
+        56,
+        92,
+        1208,
+        1158
+      ],
+      "boundsAlphaThreshold": 32,
+      "generation": "exec-192a2f40-9848-4da3-bc72-1f8be9b25e06"
+    },
+    {
+      "id": "rabbit-baby",
+      "path": "sprites/rabbit-baby.png",
+      "sha256": "b1236661f2d34656be631a1ed61283f7e9970642f8c79485a3c444c2eb61544f",
+      "size": [
+        1374,
+        1145
+      ],
+      "alphaBounds": [
+        297,
+        25,
+        1158,
+        1034
+      ],
+      "boundsAlphaThreshold": 32,
+      "generation": "exec-5d9736bc-9d83-49fb-be9f-2b977f98d65a"
+    },
+    {
+      "id": "rabbit-young",
+      "path": "sprites/rabbit-young.png",
+      "sha256": "19813455203e6556efaf75b2a7beaccb0126104ea8193321302ea6ed10c7224d",
+      "size": [
+        1536,
+        1024
+      ],
+      "alphaBounds": [
+        393,
+        26,
+        1198,
+        922
+      ],
+      "boundsAlphaThreshold": 32,
+      "generation": "exec-ab9215c2-01a9-48e0-9c77-1036500e8a16"
+    },
+    {
+      "id": "rabbit-mature",
+      "path": "sprites/rabbit-mature.png",
+      "sha256": "9e651cd06157e2b09385a7ed21cbaa051f3476061d0066f4e70b65c004c08469",
+      "size": [
+        1312,
+        1199
+      ],
+      "alphaBounds": [
+        220,
+        17,
+        1141,
+        1129
+      ],
+      "boundsAlphaThreshold": 32,
+      "generation": "exec-6734dab0-cd79-42eb-97bf-9ae7eb62aca4"
+    },
+    {
+      "id": "fox-baby",
+      "path": "sprites/fox-baby.png",
+      "sha256": "16c56f78790d053acb6867dbf20e76b273d603139a9ee33f3bb0c0fda68a6f04",
+      "size": [
+        1536,
+        1024
+      ],
+      "alphaBounds": [
+        307,
+        54,
+        1344,
+        920
+      ],
+      "boundsAlphaThreshold": 32,
+      "generation": "exec-f407df8d-93d4-40e0-aafa-ea80fe32c20d"
+    },
+    {
+      "id": "fox-young",
+      "path": "sprites/fox-young.png",
+      "sha256": "4ecc0feb810eebe03e5d12340a2a21238af5e9f3bb5d173619e8a199a55db937",
+      "size": [
+        1536,
+        1024
+      ],
+      "alphaBounds": [
+        256,
+        12,
+        1425,
+        965
+      ],
+      "boundsAlphaThreshold": 32,
+      "generation": "exec-0ad165ec-29f2-4499-aafa-8e41c9ee2a12"
+    },
+    {
+      "id": "fox-mature",
+      "path": "sprites/fox-mature.png",
+      "sha256": "c1d3fd2a3de2a65c2542b119942d874ec5366fc31f3dbc01e9e497b38911920a",
+      "size": [
+        1374,
+        1145
+      ],
+      "alphaBounds": [
+        97,
+        95,
+        1313,
+        1038
+      ],
+      "boundsAlphaThreshold": 32,
+      "generation": "exec-9dacf45b-c373-4296-a30e-1c4b8fa77cae"
+    }
+  ],
+  "actions": [
+    {
+      "id": "idle",
+      "name": "呼吸待机",
+      "durationMs": 0,
+      "description": "正在轻轻呼吸。"
+    },
+    {
+      "id": "pet",
+      "name": "摸摸",
+      "durationMs": 1400,
+      "description": "轻轻蹭一蹭，送你一颗小爱心。"
+    },
+    {
+      "id": "feed",
+      "name": "喂食",
+      "durationMs": 2200,
+      "description": "点点头，吃一口苹果。"
+    },
+    {
+      "id": "play",
+      "name": "玩耍",
+      "durationMs": 2200,
+      "description": "跟着皮球跳一跳。"
+    },
+    {
+      "id": "correct",
+      "name": "答对庆祝",
+      "durationMs": 1500,
+      "description": "答对啦，小跳庆祝！"
+    },
+    {
+      "id": "encourage",
+      "name": "温柔鼓励",
+      "durationMs": 1600,
+      "description": "慢慢来，小伙伴陪着你。"
+    },
+    {
+      "id": "upgrade",
+      "name": "升级庆祝",
+      "durationMs": 2000,
+      "description": "积累了一点成长，小伙伴很开心。"
+    },
+    {
+      "id": "evolve",
+      "name": "进化",
+      "durationMs": 2600,
+      "description": "新的配饰或毛纹正在出现。"
+    }
+  ]
+}
