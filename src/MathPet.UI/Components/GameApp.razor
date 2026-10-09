@@ -30,8 +30,8 @@ case View.Home:
     <div class="hero"><div><span class="pill">🌱 学数学 · 养伙伴</span><h2>每一次思考，<br>都让小岛更美好。</h2><p class="muted">从一个知识点开始。@(State.PetName) 已经准备好，陪你一起学习、挑战和成长。</p><div class="flex"><button class="btn" @onclick="() => Navigate(View.Courses)">开始学习 →</button><button class="btn ghost" @onclick="() => Navigate(View.Pet)">看看@(State.PetName)</button></div></div><PetPortrait /></div>
     <div class="section"><h2>我的学习计划</h2><span class="muted tiny">按自己的节奏，一步一步来</span></div>
     <div class="grid">
-        <div class="card"><span class="icon">▤</span><h3>继续学 · @Topic.Name</h3><p class="muted tiny">@GradeName 年级 · 知识点样例</p><button class="btn secondary" @onclick="OpenLesson">进入课堂</button></div>
-        <div class="card"><span class="icon" style="background:#e9f5ef">✎</span><h3>今天的小练习</h3><p class="muted tiny">3道题 · 不限时 · 今日首次完成额外 +10</p><button class="btn secondary" @onclick="() => Navigate(View.Daily)">开始练习</button></div>
+        <div class="card"><span class="icon">▤</span><h3>继续学 · @Topic.Name</h3><p class="muted tiny">@GradeName 年级 · @(State.Semester == Semester.First ? "上册" : "下册")</p><button class="btn secondary" @onclick="OpenLesson">进入课堂</button></div>
+        <div class="card"><span class="icon" style="background:#e9f5ef">✎</span><h3>今天的小练习</h3><p class="muted tiny">6道题 · 不限时 · 今日首次完成额外 +10</p><button class="btn secondary" @onclick="() => Navigate(View.Daily)">开始练习</button></div>
         <div class="card"><span class="icon" style="background:#fff2d8">⚑</span><h3>挑战知识点关卡</h3><p class="muted tiny">独立思考 · 解锁星星与积分</p><button class="btn secondary" @onclick="() => Navigate(View.Map)">去闯关</button></div>
     </div>
     <div class="section"><h2>一起成长</h2></div><div class="two">
@@ -41,16 +41,17 @@ case View.Home:
 case View.Courses:
     <p class="muted">年级 → 学期 → 单元 → 知识点 → 讲解与练习</p>
     <GradeSelector Grade="State.Grade" Semester="State.Semester" ShowSemester="true" Changed="ChangeGrade" SemesterChanged="ChangeSemester" />
-    <div class="note">当前为自编样例课程，尚未逐册核对新版人教版教材。每个年级提供一个可体验知识点；示例所在学期仅为界面分组，正式归属待核对。</div>
-    <div class="section"><h2>@GradeName 年级 · @(State.Semester == Semester.First ? "上册" : "下册")</h2><span class="muted tiny">已提供的讲解可自由查看</span></div>
-    @if (State.Semester == Semester.Second)
+    <div class="note">原创题库按小学知识范围编排。选择一个知识点，先看讲解，再练习不同题型。</div>
+    <div class="section"><h2>@GradeName 年级 · @(State.Semester == Semester.First ? "上册" : "下册")</h2><span class="muted tiny">@SemesterTopics.Count 个知识点</span></div>
+    @foreach (var unit in SemesterTopics.GroupBy(t => t.UnitName))
     {
-        <div class="card empty"><span class="icon">▤</span><h3>下册课程待编排</h3><p class="muted">先体验知识点学习流程，具体目录将在教材核对后确定。</p><button class="btn" @onclick="() => ChangeSemester(Semester.First)">查看知识点样例</button></div>
-    }
-    else
-    {
-        <div class="card"><div class="row"><div><span class="tag purple">@Topic.Area · 样例单元</span><h3 style="margin-top:12px">@Topic.Name</h3><span class="muted tiny">讲解 · 例题 · 跟着做 · 独立练习 · 闯关</span></div><button class="btn" @onclick="OpenLesson">去学习 →</button></div><div class="row"><span class="muted">知识点状态</span><span class="tag">@MasteryLabel(Engine.GetMastery(Topic))</span></div></div>
-        <div class="card" style="margin-top:15px"><h3>其余单元</h3><p class="muted">将按教材补齐数与运算、图形与几何、统计及综合实践内容。</p><span class="tag purple">内容规划中</span></div>
+        <h3>@unit.Key</h3>
+        <div class="grid">
+        @foreach (var topic in unit)
+        {
+            <div class="card" data-topic-id="@topic.Id"><span class="tag purple">@topic.Area</span><h3>@topic.Name</h3><p class="muted tiny">@topic.Questions.Select(q => q.QuestionType).Distinct().Count() 类题型 · @topic.Questions.Count 道练习 · 配套相似题</p><p class="muted tiny">@MasteryLabel(Engine.GetMastery(topic))</p><button class="btn" @onclick="() => OpenTopic(topic)">去学习 →</button></div>
+        }
+        </div>
     }
     break;
 case View.Lesson:
@@ -78,27 +79,32 @@ case View.Lesson:
             <p class="muted tiny">下一步可以独立输入答案，获得判分和反馈。</p>
             break;
         case 4:
-            <h2>自己试一试</h2><p class="muted">完成3道题，不限时，可查看分层提示。</p><button class="btn" @onclick="() => Start(StudyMode.Practice)">开始独立练习 →</button>
+            <h2>自己试一试</h2><p class="muted">每轮从不同题型中选题，不限时；多练几轮会换用新参数题。</p><button class="btn" @onclick="() => Start(StudyMode.Practice)">开始独立练习 →</button>
             break;
         case 5:
-            <h2>准备挑战了吗？</h2><p class="muted">独立答对至少2道题通过本关。使用提示的题目仍有积分，但不计入独立通关题数。</p><button class="btn" @onclick="() => Start(StudyMode.Challenge)">开始知识点闯关 ⚑</button>
+            <h2>准备挑战了吗？</h2><p class="muted">独立答对至少三分之二的题目通过本关。使用提示的题目仍有积分，但不计入独立通关题数。</p><button class="btn" @onclick="() => Start(StudyMode.Challenge)">开始知识点闯关 ⚑</button>
             break;
     }
         <div class="flex" style="margin-top:25px;justify-content:space-between"><button class="btn ghost" disabled="@(lessonStep==0)" @onclick="() => lessonStep--">上一步</button>@if(lessonStep<5) {<button class="btn secondary" @onclick="() => lessonStep++">下一步 →</button>}</div>
     </div>
     break;
 case View.Daily:
-    <GradeSelector Grade="State.Grade" Changed="ChangeGrade" />
-    <div class="hero"><div><span class="pill">练习模式 · 不限时</span><h2>温习一点，巩固一点。</h2><p class="muted">目前练习当前年级的3道样例题。完整题库上线后，再扩展为当前知识、旧知识和错题的每日组合。</p><button class="btn" @onclick="() => Start(StudyMode.Daily)">开始今日练习 →</button></div><div style="font-size:75px">✎</div></div>
+    <GradeSelector Grade="State.Grade" Semester="State.Semester" ShowSemester="true" Changed="ChangeGrade" SemesterChanged="ChangeSemester" />
+    <div class="hero"><div><span class="pill">练习模式 · 不限时</span><h2>温习一点，巩固一点。</h2><p class="muted">从当前年级和学期选6道题，优先选择练得较少的知识点，并加入已有错题。</p><button class="btn" @onclick="() => Start(StudyMode.Daily)">开始今日练习 →</button></div><div style="font-size:75px">✎</div></div>
     <div class="grid" style="margin-top:20px"><div class="card"><h3>当前知识</h3><p class="muted">@Topic.Name</p></div><div class="card"><h3>学习积分</h3><p class="muted">年级系数 @GameEngine.GradeMultipliers[State.Grade-1] · 今日首次完成额外 +10</p></div><div class="card"><h3>错题巩固</h3><p class="muted">@State.Mistakes.Count 道待复习</p><button class="btn secondary" @onclick="() => Navigate(View.Review)">去复习</button></div></div>
     <div class="note">题目基础分10 × 年级系数 × 难度系数。使用提示奖励为60%，重复做对奖励为30%。答错不扣分。</div>
     break;
 case View.Map:
-    <GradeSelector Grade="State.Grade" Changed="ChangeGrade" />
+    <GradeSelector Grade="State.Grade" Semester="State.Semester" ShowSemester="true" Changed="ChangeGrade" SemesterChanged="ChangeSemester" />
     <div class="hero"><div><span class="pill">知识点 → 单元 → 学期</span><h2>向下一颗星星出发。</h2><p class="muted">先挑战一个知识点。单元和学期综合关待完整题库制作后开放。</p></div><div style="font-size:70px">🏁</div></div>
     <div class="section"><h2>我的闯关路线</h2><span class="muted tiny">@GradeName 年级 · 年级系数 @GameEngine.GradeMultipliers[State.Grade-1]</span></div>
-    <div class="grid"><div class="card"><span class="icon">1</span><h3>@Topic.Name</h3><p class="muted tiny">3道题 · 独立答对2道通过 · 按题型限时</p><div class="stars">@StarText(State.Stars.GetValueOrDefault(Topic.Id))</div><button class="btn" style="margin-top:18px" @onclick="() => Start(StudyMode.Challenge)">@(State.Stars.ContainsKey(Topic.Id)?"再次挑战":"开始闯关")</button></div><div class="card"><span class="icon">@(State.Stars.ContainsKey(Topic.Id)?"2":"🔒")</span><h3>单元综合关</h3><p class="muted">@(State.Stars.ContainsKey(Topic.Id)?"前置条件已达成，题目待制作。":"通过知识点关卡后解锁。")</p><button class="btn ghost" disabled>内容待制作</button></div><div class="card"><span class="icon">🔒</span><h3>学期综合关</h3><p class="muted">通过本学期单元综合关后解锁。</p><button class="btn ghost" disabled>尚未开放</button></div></div>
-    <div class="note">时限为初始值：基础计算30秒，分数题45秒，应用题60秒。超时后仍能作答，只失去速度奖励，不影响正确答案获得积分。退出后已获得的题目积分保留。</div>
+    <div class="grid">
+    @foreach(var topic in SemesterTopics)
+    {
+        <div class="card" data-topic-id="@topic.Id"><span class="tag">@topic.UnitName</span><h3>@topic.Name</h3><p class="muted tiny">不同题型组合 · 独立答对至少三分之二通过 · 按题型限时</p><div class="stars">@StarText(State.Stars.GetValueOrDefault(topic.Id))</div><button class="btn" @onclick="() => ChallengeTopic(topic)">@(State.Stars.ContainsKey(topic.Id)?"再次挑战":"开始闯关")</button></div>
+    }
+    </div>
+    <div class="note">时限为初始建议，按题型设置为30～120秒。超时后仍能作答，只失去速度奖励，不影响正确答案获得积分。退出后已获得的题目积分保留。</div>
     break;
 case View.Quiz:
     @if(quiz is not null)
@@ -107,7 +113,12 @@ case View.Quiz:
         <div class="progress"><i style="width:@(quiz.Index*100/quiz.Questions.Count)%"></i></div>
         <div class="card" style="margin-top:20px"><span class="tag">@Curriculum.GradeNames[quiz.Topic.Grade-1]年级 · @quiz.Topic.Name</span>
         @if(quiz.Mode==StudyMode.Review){<p class="muted tiny">这是一道相似题。独立答对后，可移除对应错题；用提示做对则保留，方便再巩固。</p>}
+        <span class="tag">@quiz.Current.QuestionType · @Curriculum.FindTopic(quiz.Current.TopicId).Name</span>
         <div class="big-problem" data-testid="question">@quiz.Current.Text</div>
+        @if(quiz.Current.Options.Length > 0)
+        {
+            <div class="flex">@for(var i=0;i<quiz.Current.Options.Length;i++){var option=i;<button class="btn secondary" disabled="@quiz.Answered" @onclick="() => answerText=option.ToString()">@option：@quiz.Current.Options[i]</button>}</div>
+        }
         <form class="answer-form" @onsubmit="Submit" @onsubmit:preventDefault>
             <label class="muted tiny" for="answer">@(quiz.Topic.Grade==5?"请输入分数，如5/6；等值分数也可":"请输入数字，题目中的单位可省略")</label><br>
             <input id="answer" class="answer" @bind="answerText" @bind:event="oninput" autocomplete="off" maxlength="100" placeholder="写下你的答案" disabled="@quiz.Answered" @ref="answerInput" />

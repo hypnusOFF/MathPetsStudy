@@ -1,12 +1,31 @@
 namespace MathPet.Core;
 
-/// <summary>Self-authored, reviewed sample content. This is not a complete textbook catalogue.</summary>
+/// <summary>Original exercises organized around primary-school mathematical concepts.</summary>
 public static class Curriculum
 {
     public static readonly string[] GradeNames = ["一", "二", "三", "四", "五", "六"];
-    public static IReadOnlyList<Topic> Topics { get; } = Create();
-    public static Topic ForGrade(int grade) => Topics.Single(t => t.Grade == grade);
-    public static Question? FindQuestion(string id) => Topics.SelectMany(t => t.Questions.Concat(t.ReviewQuestions)).FirstOrDefault(q => q.Id == id);
+    public static IReadOnlyList<Topic> Topics { get; } = Create().Select(t => t with
+    {
+        Semester = t.Grade is 3 or 4 or 5 ? Semester.Second : Semester.First,
+        UnitName = t.Name, Order = 1000
+    }).Concat(LoadBank()).ToArray();
+    private static readonly IReadOnlyDictionary<string, Topic> TopicIndex = Topics.ToDictionary(t => t.Id);
+    private static readonly IReadOnlyDictionary<string, Question> QuestionIndex = Topics
+        .SelectMany(t => t.Questions.Concat(t.ReviewQuestions)).ToDictionary(q => q.Id);
+    // Retain legacy IDs and entry points so existing saves and integrations remain usable.
+    public static Topic ForGrade(int grade) => Topics.First(t => t.Grade == grade);
+    public static IReadOnlyList<Topic> ForSemester(int grade, Semester semester) => Topics
+        .Where(t => t.Grade == grade && t.Semester == semester).OrderBy(t => t.Order).ToArray();
+    public static Topic FindTopic(string id) => TopicIndex.TryGetValue(id, out var topic)
+        ? topic : throw new ArgumentException("知识点不存在。");
+    public static Question? FindQuestion(string id) => QuestionIndex.GetValueOrDefault(id);
+    private static IReadOnlyList<Topic> LoadBank()
+    {
+        using var stream = typeof(Curriculum).Assembly.GetManifestResourceStream("MathPet.Core.Content.question-bank.json")
+            ?? throw new InvalidDataException("原创题库缺失。");
+        return System.Text.Json.JsonSerializer.Deserialize<Topic[]>(stream)
+            ?? throw new InvalidDataException("原创题库为空。");
+    }
     private static Question Q(string id, int grade, string topic, string text, string answer, string? unit,
         string hint1, string hint2, string solution, string mistake, int seconds = 30, decimal difficulty = 1m)
         => new(id, grade, topic, text, answer, unit, [hint1, hint2], solution.Split('|'), mistake, seconds, difficulty);

@@ -12,27 +12,59 @@ public sealed class GameEngine(PlayerState state, TimeProvider? clock = null)
         new(ItemKind.Ribbon,"紫色蝴蝶结","🎀",80,"可穿戴装饰，不影响答题"),
         new(ItemKind.Room,"春日小屋","🌷",100,"可切换的家园装饰")
     ];
-    public QuizSession Start(StudyMode mode, int grade, string? mistakeId = null)
+    public QuizSession Start(StudyMode mode, int grade, string? mistakeId = null, string? topicId = null)
     {
-        var topic = Curriculum.ForGrade(grade);
+        var topic = topicId is null ? Curriculum.ForGrade(grade) : Curriculum.FindTopic(topicId);
+        if (topic.Grade != grade) throw new ArgumentException("知识点与年级不匹配。");
         var questions = topic.Questions.ToList();
         string? reviewOriginal = null;
         if (mode == StudyMode.Review)
         {
             var original = Curriculum.FindQuestion(mistakeId ?? "") ?? throw new ArgumentException("错题不存在。");
-            topic = Curriculum.ForGrade(original.Grade);
+            topic = Curriculum.FindTopic(original.TopicId);
             if (!State.Mistakes.Any(m => m.QuestionId == original.Id)) throw new ArgumentException("该题已不在错题列表。");
             var index = topic.Questions.ToList().FindIndex(q => q.Id == original.Id);
             if (index < 0) index = topic.ReviewQuestions.ToList().FindIndex(q => q.Id == original.Id);
-            questions = [topic.ReviewQuestions[Math.Max(0,index)]];
+            if (index < 0) throw new ArgumentException("相似题不存在。");
+            // A failed review stays paired with the original. Reviewing a variant
+            // uses the original problem rather than offering the identical item.
+            questions = [topic.Questions.Any(q => q.Id == original.Id)
+                ? topic.ReviewQuestions[index] : topic.Questions[index]];
             reviewOriginal = original.Id;
         }
+        else if (topicId is not null)
+        {
+            // Balance templates and rotate their variants using recorded attempts.
+            // Stable IDs make old mistakes and reduced repeat rewards reproducible.
+            var groups = questions.GroupBy(q => q.TemplateId).ToArray();
+            questions = groups.Select(group => group.OrderBy(q => State.Progress.GetValueOrDefault(q.Id)?.AttemptCount ?? 0)
+                .ThenBy(q => q.Id).First()).Take(6).ToList();
+            if (groups.Length == 1) questions = topic.Questions.OrderBy(q => State.Progress.GetValueOrDefault(q.Id)?.AttemptCount ?? 0)
+                .ThenBy(q => q.Id).Take(6).ToList();
+        }
         return new QuizSession(this, mode, topic, questions, reviewOriginal);
+    }
+    public QuizSession StartDaily(int grade, Semester semester)
+    {
+        var topics = Curriculum.ForSemester(grade, semester).Where(t => t.Order < 1000).ToArray();
+        var selected = topics.OrderBy(t => t.Questions.Sum(q => State.Progress.GetValueOrDefault(q.Id)?.AttemptCount ?? 0))
+            .ThenBy(t => t.Order).Take(6).ToArray();
+        var questions = selected.Select((t, i) => t.Questions
+            .OrderBy(q => State.Progress.GetValueOrDefault(q.Id)?.AttemptCount ?? 0)
+            .ThenBy(q => q.TemplateId == t.Questions[i % 5].TemplateId ? 0 : 1)
+            .ThenBy(q => q.Id).First()).ToList();
+        // Include one saved misconception from this semester without repeating a
+        // question already in the daily selection.
+        var original = State.Mistakes.Select(m => Curriculum.FindQuestion(m.QuestionId))
+            .FirstOrDefault(q => q is not null && topics.Any(t => t.Id == q.TopicId));
+        if (original is not null && !questions.Any(q => q.Id == original.Id)) questions[^1] = original;
+        return new QuizSession(this, StudyMode.Daily, selected[0], questions, null);
     }
     public Mastery GetMastery(Topic topic)
     {
         if (State.Mistakes.Any(m => Curriculum.FindQuestion(m.QuestionId)?.TopicId == topic.Id)) return Mastery.NeedsReview;
-        if (topic.Questions.All(q => State.Progress.TryGetValue(q.Id, out var p) && p.IndependentCorrectCount >= 2)
+        if (topic.Questions.GroupBy(q => q.TemplateId == "legacy" ? q.Id : q.TemplateId)
+            .All(group => group.Sum(q => State.Progress.GetValueOrDefault(q.Id)?.IndependentCorrectCount ?? 0) >= 2)
             && State.Stars.ContainsKey(topic.Id)) return Mastery.Mastered;
         return State.ViewedTopics.Contains(topic.Id) || topic.Questions.Any(q => State.Progress.ContainsKey(q.Id))
             ? Mastery.Learning : Mastery.NotStarted;
@@ -160,7 +192,7 @@ public sealed class QuizSession
             if (mistake is null) { mistake = new Mistake { QuestionId = mistakeKey }; state.Mistakes.Add(mistake); }
             mistake.LastAnswer = input; mistake.WrongCount++; mistake.LastAttempt = engine.Clock.GetUtcNow();
         }
-        state.ViewedTopics.Add(Topic.Id);
+        state.ViewedTopics.Add(q.TopicId);
         answers.Add(result); Answered = true;
         return result;
     }
@@ -179,8 +211,8 @@ public sealed class QuizSession
         var correct = answers.Count(a => a.Correct);
         // Hints help learning, but hinted answers do not satisfy an independent challenge pass.
         var independent = answers.Count(a => a.Correct && !a.UsedHint);
-        var passed = Mode == StudyMode.Challenge && independent >= 2;
-        var bonus = 0; var stars = passed ? independent : 0;
+        var passed = Mode == StudyMode.Challenge && independent >= (int)Math.Ceiling(Questions.Count * 2m / 3m);
+        var bonus = 0; var stars = passed ? independent == Questions.Count ? 3 : independent >= (int)Math.Ceiling(Questions.Count * .8m) ? 2 : 1 : 0;
         if (passed)
         {
             if (!state.Stars.ContainsKey(Topic.Id)) bonus = (int)(20 * GameEngine.GradeMultipliers[Topic.Grade-1]);
@@ -190,7 +222,8 @@ public sealed class QuizSession
         if (Mode == StudyMode.Daily && state.DailyBonuses.Add($"{localDate:yyyy-MM-dd}")) bonus += 10;
         state.Coins += bonus;
         var growth = engine.AddGrowth(correct * 2);
-        summary = new(Mode,correct,Questions.Count,answers.Sum(a => a.Points),bonus,growth,passed,stars,Topic.Grade,Topic.Name);
+        summary = new(Mode,correct,Questions.Count,answers.Sum(a => a.Points),bonus,growth,passed,stars,Topic.Grade,
+            Mode == StudyMode.Daily ? "跨知识点每日练习" : Topic.Name);
         return summary;
     }
 }

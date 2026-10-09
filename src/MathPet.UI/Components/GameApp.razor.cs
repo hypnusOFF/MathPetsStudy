@@ -32,7 +32,9 @@ public partial class GameApp
     private bool disposed;
     private PlayerState State => Game.Engine.State;
     private GameEngine Engine => Game.Engine;
-    private Topic Topic => Curriculum.ForGrade(State.Grade);
+    private string? selectedTopicId;
+    private IReadOnlyList<Topic> SemesterTopics => Curriculum.ForSemester(State.Grade, State.Semester);
+    private Topic Topic => SemesterTopics.FirstOrDefault(t => t.Id == selectedTopicId) ?? SemesterTopics[0];
     private string GradeName => Curriculum.GradeNames[State.Grade-1];
     private string PageTitle => view switch
     {
@@ -52,8 +54,11 @@ public partial class GameApp
     private static string MasteryLabel(Mastery mastery)=>mastery switch
     {Mastery.NotStarted=>"未学",Mastery.Learning=>"学习中",Mastery.NeedsReview=>"待巩固",_=>"已掌握"};
     private static string StarText(int stars)=>new string('★',stars)+new string('☆',3-stars);
-    private async Task ChangeGrade(int grade){State.Grade=grade;await Game.SaveAsync();}
-    private async Task ChangeSemester(Semester semester){State.Semester=semester;await Game.SaveAsync();}
+    private async Task ChangeGrade(int grade){State.Grade=grade;selectedTopicId=null;await Game.SaveAsync();}
+    private async Task ChangeSemester(Semester semester){State.Semester=semester;selectedTopicId=null;await Game.SaveAsync();}
+    private async Task OpenTopic(Topic topic){selectedTopicId=topic.Id;await OpenLesson();}
+    private async Task ChallengeTopic(Topic topic){selectedTopicId=topic.Id;await Start(StudyMode.Challenge);}
+    private void SelectTopic(ChangeEventArgs e){selectedTopicId=e.Value?.ToString();}
     private async Task OpenLesson(){State.ViewedTopics.Add(Topic.Id);lessonStep=0;await Game.SaveAsync();await Navigate(View.Lesson);}
     private Task Navigate(View next)
     {
@@ -71,7 +76,8 @@ public partial class GameApp
     }
     private async Task Start(StudyMode mode,string? mistakeId=null)
     {
-        StopTimer();quiz=Engine.Start(mode,State.Grade,mistakeId);summary=null;view=View.Quiz;
+        StopTimer();quiz=mode==StudyMode.Daily ? Engine.StartDaily(State.Grade,State.Semester)
+            : Engine.Start(mode,State.Grade,mistakeId,mode==StudyMode.Review ? null : Topic.Id);summary=null;view=View.Quiz;
         PrepareQuestion();
         if(mode==StudyMode.Challenge)
         {

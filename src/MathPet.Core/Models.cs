@@ -7,10 +7,21 @@ public enum ItemKind { Food, Toy, Ribbon, Room }
 
 public sealed record Question(string Id, int Grade, string TopicId, string Text, string Answer,
     string? Unit, string[] Hints, string[] Solution, string CommonMistake, int TimeLimitSeconds,
-    decimal Difficulty = 1m);
+    decimal Difficulty = 1m)
+{
+    public string QuestionType { get; init; } = "基础练习";
+    public string TemplateId { get; init; } = "legacy";
+    public string[] Options { get; init; } = [];
+    public string Source { get; init; } = "独立原创";
+}
 public sealed record Topic(string Id, int Grade, string Name, string Area, string Goal,
     string Explanation, string Visual, string[] ExampleSteps, IReadOnlyList<Question> Questions,
-    IReadOnlyList<Question> ReviewQuestions);
+    IReadOnlyList<Question> ReviewQuestions)
+{
+    public Semester Semester { get; init; }
+    public string UnitName { get; init; } = "基础练习";
+    public int Order { get; init; }
+}
 public sealed record ShopItem(ItemKind Kind, string Name, string Icon, int Price, string Description);
 public sealed class Mistake
 {
