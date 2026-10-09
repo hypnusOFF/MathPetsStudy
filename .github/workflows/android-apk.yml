@@ -13,6 +13,10 @@ on:
       - 'NuGet.Config'
       - 'scripts/verify-workload-packages.py'
       - 'scripts/prepare-android-sdk.py'
+      - 'scripts/generate-pet-assets.py'
+      - 'scripts/package-pet-assets.py'
+      - 'docs/pet-assets.md'
+      - 'docs/pet-concept.png'
 
 permissions:
   contents: read
@@ -30,6 +34,17 @@ jobs:
     steps:
       - name: Check out source
         uses: actions/checkout@v5
+      - name: Package original pet resources
+        run: python3 scripts/package-pet-assets.py
+      - name: Upload pet resources and offline preview
+        uses: actions/upload-artifact@v4
+        with:
+          name: mathpet-pet-assets
+          path: |
+            artifacts/mathpet-pet-assets.zip
+            artifacts/mathpet-pet-preview.html
+          if-no-files-found: error
+          retention-days: 30
       - name: Install .NET SDK
         uses: actions/setup-dotnet@v5
         with:

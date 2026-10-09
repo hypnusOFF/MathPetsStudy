@@ -1,0 +1,41 @@
+.rig,.body,.head,.tail,.ear,.paw,.mouth-chew,.eyes {transform-box:fill-box}
+.rig {transform-origin:50% 100%;animation:pet-breathe 3.6s ease-in-out infinite}
+.tail {transform-origin:10% 85%;animation:pet-tail 7s ease-in-out infinite}
+.ear.left {transform-origin:80% 20%}.ear.right {transform-origin:20% 20%}
+.eyes {transform-origin:50% 50%;animation:pet-blink 6.8s linear infinite}
+.eyes-happy,.mouth-chew,.effect {opacity:0}.head {transform-origin:50% 85%}
+.paw.left {transform-origin:70% 10%}.paw.right {transform-origin:30% 10%}
+svg[data-action="pet"] .head {animation:pet-nuzzle 1.2s ease-in-out 1}
+svg[data-action="pet"] .eyes,svg[data-action="pet"] .mouth-normal {opacity:0;animation:none}
+svg[data-action="pet"] .eyes-happy,svg[data-action="pet"] .hearts {opacity:1}
+svg[data-action="feed"] .head {animation:pet-nod 1.9s ease-in-out 1}
+svg[data-action="feed"] .mouth-normal {opacity:0}
+svg[data-action="feed"] .mouth-chew {opacity:1;animation:pet-chew .35s ease-in-out 5}
+svg[data-action="feed"] .food-effect {opacity:1;animation:pet-food 2s ease-out 1 forwards}
+svg[data-action="play"] .rig {animation:pet-hop .7s ease-in-out 3}
+svg[data-action="play"] .paw.left {animation:pet-wave .6s ease-in-out 3}
+svg[data-action="play"] .toy-effect {opacity:1;animation:pet-ball 1.9s ease-in-out 1}
+svg[data-action="correct"] .rig {animation:pet-hop .65s ease-in-out 2}
+svg[data-action="correct"] .sparkles {opacity:1;animation:pet-sparkle 1.4s ease-out 1}
+svg[data-action="encourage"] .head {animation:pet-nuzzle 1.2s ease-in-out 1}
+svg[data-action="encourage"] .ear {animation:pet-ear .8s ease-in-out 2}
+svg[data-action="upgrade"] .rig {animation:pet-celebrate 2s ease-in-out 1}
+svg[data-action="upgrade"] .sparkles,svg[data-action="evolve"] .sparkles {opacity:1;animation:pet-sparkle 2.8s ease-in-out 1}
+svg[data-action="evolve"] .rig {animation:pet-evolve 2.8s ease-in-out 1}
+@keyframes pet-breathe {0%,100%{transform:scale(1,1)}50%{transform:scale(1.012,1.018)}}
+@keyframes pet-tail {0%,70%,100%{transform:rotate(0)}76%{transform:rotate(-7deg)}84%{transform:rotate(5deg)}92%{transform:rotate(-3deg)}}
+@keyframes pet-blink {0%,42%,46%,100%{transform:scaleY(1)}44%{transform:scaleY(.06)}}
+@keyframes pet-nuzzle {0%,100%{transform:rotate(0)}35%{transform:rotate(-7deg)}70%{transform:rotate(4deg)}}
+@keyframes pet-nod {0%,100%{transform:rotate(0) translateY(0)}25%,65%{transform:rotate(3deg) translateY(4px)}45%,85%{transform:rotate(-2deg) translateY(1px)}}
+@keyframes pet-chew {50%{transform:scale(1.2,.7)}}
+@keyframes pet-hop {0%,100%{transform:translateY(0)}45%{transform:translateY(-12px) rotate(-2deg)}}
+@keyframes pet-wave {0%,100%{transform:rotate(0)}50%{transform:rotate(-24deg)}}
+@keyframes pet-ear {50%{transform:rotate(5deg)}}
+@keyframes pet-celebrate {0%,100%{transform:translateY(0) scale(1)}25%,65%{transform:translateY(-14px) scale(1.035)}45%{transform:translateY(0)}}
+@keyframes pet-evolve {0%,100%{opacity:1;transform:scale(1)}40%{opacity:.25;transform:scale(.95)}55%{opacity:.1;transform:scale(1.08)}80%{opacity:1;transform:scale(1.025)}}
+@keyframes pet-sparkle {0%{opacity:0}25%,65%{opacity:1}100%{opacity:0}}
+@keyframes pet-food {0%{opacity:0}25%,60%{opacity:1}100%{opacity:0}}
+@keyframes pet-ball {0%,100%{transform:translateX(0)}35%{transform:translateX(-25px) rotate(-20deg)}70%{transform:translateX(15px) rotate(20deg)}}
+svg[data-motion="reduced"] * {animation:none!important}
+svg[data-motion="reduced"] .rig {transform:none!important}
+@media(prefers-reduced-motion:reduce){.rig,.tail,.ear,.paw,.head,.eyes,.effect,.mouth-chew {animation:none!important}}

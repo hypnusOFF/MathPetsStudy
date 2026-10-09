@@ -1,0 +1,909 @@
+{
+  "version": 1,
+  "viewBox": [
+    0,
+    0,
+    320,
+    360
+  ],
+  "species": {
+    "cat": "团团猫",
+    "rabbit": "糯糯兔",
+    "fox": "星星狐"
+  },
+  "stages": {
+    "baby": {
+      "name": "幼年",
+      "levels": [
+        1,
+        5
+      ],
+      "headY": 205,
+      "bodyY": 280,
+      "bodyRx": 43,
+      "bodyRy": 44,
+      "headRx": 65,
+      "headRy": 58
+    },
+    "young": {
+      "name": "成长",
+      "levels": [
+        6,
+        12
+      ],
+      "headY": 181,
+      "bodyY": 266,
+      "bodyRx": 48,
+      "bodyRy": 58,
+      "headRx": 64,
+      "headRy": 57
+    },
+    "mature": {
+      "name": "成熟",
+      "levels": [
+        13,
+        20
+      ],
+      "headY": 158,
+      "bodyY": 252,
+      "bodyRx": 52,
+      "bodyRy": 72,
+      "headRx": 63,
+      "headRy": 56
+    }
+  },
+  "pets": [
+    {
+      "id": "cat-baby",
+      "species": "cat",
+      "stage": "baby",
+      "path": "pets/cat-baby.svg",
+      "levels": [
+        1,
+        5
+      ],
+      "anchors": {
+        "head": [
+          160,
+          156
+        ],
+        "body": [
+          160,
+          283
+        ],
+        "accessory": [
+          160,
+          250
+        ],
+        "back": [
+          160,
+          280
+        ]
+      },
+      "scales": {
+        "head": [
+          0.77,
+          0.77
+        ],
+        "body": [
+          0.6142857142857143,
+          0.676923076923077
+        ],
+        "accessory": [
+          0.62,
+          0.62
+        ],
+        "back": [
+          0.6142857142857143,
+          0.676923076923077
+        ]
+      },
+      "layers": [
+        "shadow",
+        "tail",
+        "slot-back",
+        "body",
+        "feet",
+        "slot-body",
+        "head",
+        "ear-left",
+        "ear-right",
+        "face-base",
+        "eyes-open",
+        "eyes-happy",
+        "mouth-normal",
+        "mouth-chew",
+        "slot-head",
+        "paw-left",
+        "paw-right",
+        "slot-accessory",
+        "effect-hearts",
+        "effect-sparkles",
+        "effect-food",
+        "effect-toy"
+      ]
+    },
+    {
+      "id": "cat-young",
+      "species": "cat",
+      "stage": "young",
+      "path": "pets/cat-young.svg",
+      "levels": [
+        6,
+        12
+      ],
+      "anchors": {
+        "head": [
+          160,
+          133
+        ],
+        "body": [
+          160,
+          269
+        ],
+        "accessory": [
+          160,
+          236
+        ],
+        "back": [
+          160,
+          266
+        ]
+      },
+      "scales": {
+        "head": [
+          0.77,
+          0.77
+        ],
+        "body": [
+          0.6857142857142857,
+          0.8923076923076924
+        ],
+        "accessory": [
+          0.62,
+          0.62
+        ],
+        "back": [
+          0.6857142857142857,
+          0.8923076923076924
+        ]
+      },
+      "layers": [
+        "shadow",
+        "tail",
+        "slot-back",
+        "body",
+        "feet",
+        "slot-body",
+        "head",
+        "ear-left",
+        "ear-right",
+        "face-base",
+        "eyes-open",
+        "eyes-happy",
+        "mouth-normal",
+        "mouth-chew",
+        "slot-head",
+        "paw-left",
+        "paw-right",
+        "slot-accessory",
+        "effect-hearts",
+        "effect-sparkles",
+        "effect-food",
+        "effect-toy"
+      ]
+    },
+    {
+      "id": "cat-mature",
+      "species": "cat",
+      "stage": "mature",
+      "path": "pets/cat-mature.svg",
+      "levels": [
+        13,
+        20
+      ],
+      "anchors": {
+        "head": [
+          160,
+          111
+        ],
+        "body": [
+          160,
+          255
+        ],
+        "accessory": [
+          160,
+          222
+        ],
+        "back": [
+          160,
+          252
+        ]
+      },
+      "scales": {
+        "head": [
+          0.77,
+          0.77
+        ],
+        "body": [
+          0.7428571428571429,
+          1.1076923076923078
+        ],
+        "accessory": [
+          0.62,
+          0.62
+        ],
+        "back": [
+          0.7428571428571429,
+          1.1076923076923078
+        ]
+      },
+      "layers": [
+        "shadow",
+        "tail",
+        "slot-back",
+        "body",
+        "feet",
+        "slot-body",
+        "head",
+        "ear-left",
+        "ear-right",
+        "face-base",
+        "eyes-open",
+        "eyes-happy",
+        "mouth-normal",
+        "mouth-chew",
+        "slot-head",
+        "paw-left",
+        "paw-right",
+        "slot-accessory",
+        "effect-hearts",
+        "effect-sparkles",
+        "effect-food",
+        "effect-toy"
+      ]
+    },
+    {
+      "id": "rabbit-baby",
+      "species": "rabbit",
+      "stage": "baby",
+      "path": "pets/rabbit-baby.svg",
+      "levels": [
+        1,
+        5
+      ],
+      "anchors": {
+        "head": [
+          160,
+          156
+        ],
+        "body": [
+          160,
+          283
+        ],
+        "accessory": [
+          160,
+          250
+        ],
+        "back": [
+          160,
+          280
+        ]
+      },
+      "scales": {
+        "head": [
+          0.77,
+          0.77
+        ],
+        "body": [
+          0.6142857142857143,
+          0.676923076923077
+        ],
+        "accessory": [
+          0.62,
+          0.62
+        ],
+        "back": [
+          0.6142857142857143,
+          0.676923076923077
+        ]
+      },
+      "layers": [
+        "shadow",
+        "tail",
+        "slot-back",
+        "body",
+        "feet",
+        "slot-body",
+        "head",
+        "ear-left",
+        "ear-right",
+        "face-base",
+        "eyes-open",
+        "eyes-happy",
+        "mouth-normal",
+        "mouth-chew",
+        "slot-head",
+        "paw-left",
+        "paw-right",
+        "slot-accessory",
+        "effect-hearts",
+        "effect-sparkles",
+        "effect-food",
+        "effect-toy"
+      ]
+    },
+    {
+      "id": "rabbit-young",
+      "species": "rabbit",
+      "stage": "young",
+      "path": "pets/rabbit-young.svg",
+      "levels": [
+        6,
+        12
+      ],
+      "anchors": {
+        "head": [
+          160,
+          133
+        ],
+        "body": [
+          160,
+          269
+        ],
+        "accessory": [
+          160,
+          236
+        ],
+        "back": [
+          160,
+          266
+        ]
+      },
+      "scales": {
+        "head": [
+          0.77,
+          0.77
+        ],
+        "body": [
+          0.6857142857142857,
+          0.8923076923076924
+        ],
+        "accessory": [
+          0.62,
+          0.62
+        ],
+        "back": [
+          0.6857142857142857,
+          0.8923076923076924
+        ]
+      },
+      "layers": [
+        "shadow",
+        "tail",
+        "slot-back",
+        "body",
+        "feet",
+        "slot-body",
+        "head",
+        "ear-left",
+        "ear-right",
+        "face-base",
+        "eyes-open",
+        "eyes-happy",
+        "mouth-normal",
+        "mouth-chew",
+        "slot-head",
+        "paw-left",
+        "paw-right",
+        "slot-accessory",
+        "effect-hearts",
+        "effect-sparkles",
+        "effect-food",
+        "effect-toy"
+      ]
+    },
+    {
+      "id": "rabbit-mature",
+      "species": "rabbit",
+      "stage": "mature",
+      "path": "pets/rabbit-mature.svg",
+      "levels": [
+        13,
+        20
+      ],
+      "anchors": {
+        "head": [
+          160,
+          111
+        ],
+        "body": [
+          160,
+          255
+        ],
+        "accessory": [
+          160,
+          222
+        ],
+        "back": [
+          160,
+          252
+        ]
+      },
+      "scales": {
+        "head": [
+          0.77,
+          0.77
+        ],
+        "body": [
+          0.7428571428571429,
+          1.1076923076923078
+        ],
+        "accessory": [
+          0.62,
+          0.62
+        ],
+        "back": [
+          0.7428571428571429,
+          1.1076923076923078
+        ]
+      },
+      "layers": [
+        "shadow",
+        "tail",
+        "slot-back",
+        "body",
+        "feet",
+        "slot-body",
+        "head",
+        "ear-left",
+        "ear-right",
+        "face-base",
+        "eyes-open",
+        "eyes-happy",
+        "mouth-normal",
+        "mouth-chew",
+        "slot-head",
+        "paw-left",
+        "paw-right",
+        "slot-accessory",
+        "effect-hearts",
+        "effect-sparkles",
+        "effect-food",
+        "effect-toy"
+      ]
+    },
+    {
+      "id": "fox-baby",
+      "species": "fox",
+      "stage": "baby",
+      "path": "pets/fox-baby.svg",
+      "levels": [
+        1,
+        5
+      ],
+      "anchors": {
+        "head": [
+          160,
+          156
+        ],
+        "body": [
+          160,
+          283
+        ],
+        "accessory": [
+          160,
+          250
+        ],
+        "back": [
+          160,
+          280
+        ]
+      },
+      "scales": {
+        "head": [
+          0.77,
+          0.77
+        ],
+        "body": [
+          0.6142857142857143,
+          0.676923076923077
+        ],
+        "accessory": [
+          0.62,
+          0.62
+        ],
+        "back": [
+          0.6142857142857143,
+          0.676923076923077
+        ]
+      },
+      "layers": [
+        "shadow",
+        "tail",
+        "slot-back",
+        "body",
+        "feet",
+        "slot-body",
+        "head",
+        "ear-left",
+        "ear-right",
+        "face-base",
+        "eyes-open",
+        "eyes-happy",
+        "mouth-normal",
+        "mouth-chew",
+        "slot-head",
+        "paw-left",
+        "paw-right",
+        "slot-accessory",
+        "effect-hearts",
+        "effect-sparkles",
+        "effect-food",
+        "effect-toy"
+      ]
+    },
+    {
+      "id": "fox-young",
+      "species": "fox",
+      "stage": "young",
+      "path": "pets/fox-young.svg",
+      "levels": [
+        6,
+        12
+      ],
+      "anchors": {
+        "head": [
+          160,
+          133
+        ],
+        "body": [
+          160,
+          269
+        ],
+        "accessory": [
+          160,
+          236
+        ],
+        "back": [
+          160,
+          266
+        ]
+      },
+      "scales": {
+        "head": [
+          0.77,
+          0.77
+        ],
+        "body": [
+          0.6857142857142857,
+          0.8923076923076924
+        ],
+        "accessory": [
+          0.62,
+          0.62
+        ],
+        "back": [
+          0.6857142857142857,
+          0.8923076923076924
+        ]
+      },
+      "layers": [
+        "shadow",
+        "tail",
+        "slot-back",
+        "body",
+        "feet",
+        "slot-body",
+        "head",
+        "ear-left",
+        "ear-right",
+        "face-base",
+        "eyes-open",
+        "eyes-happy",
+        "mouth-normal",
+        "mouth-chew",
+        "slot-head",
+        "paw-left",
+        "paw-right",
+        "slot-accessory",
+        "effect-hearts",
+        "effect-sparkles",
+        "effect-food",
+        "effect-toy"
+      ]
+    },
+    {
+      "id": "fox-mature",
+      "species": "fox",
+      "stage": "mature",
+      "path": "pets/fox-mature.svg",
+      "levels": [
+        13,
+        20
+      ],
+      "anchors": {
+        "head": [
+          160,
+          111
+        ],
+        "body": [
+          160,
+          255
+        ],
+        "accessory": [
+          160,
+          222
+        ],
+        "back": [
+          160,
+          252
+        ]
+      },
+      "scales": {
+        "head": [
+          0.77,
+          0.77
+        ],
+        "body": [
+          0.7428571428571429,
+          1.1076923076923078
+        ],
+        "accessory": [
+          0.62,
+          0.62
+        ],
+        "back": [
+          0.7428571428571429,
+          1.1076923076923078
+        ]
+      },
+      "layers": [
+        "shadow",
+        "tail",
+        "slot-back",
+        "body",
+        "feet",
+        "slot-body",
+        "head",
+        "ear-left",
+        "ear-right",
+        "face-base",
+        "eyes-open",
+        "eyes-happy",
+        "mouth-normal",
+        "mouth-chew",
+        "slot-head",
+        "paw-left",
+        "paw-right",
+        "slot-accessory",
+        "effect-hearts",
+        "effect-sparkles",
+        "effect-food",
+        "effect-toy"
+      ]
+    }
+  ],
+  "wearables": [
+    {
+      "id": "bow",
+      "path": "wearables/bow.svg",
+      "name": "紫色蝴蝶结",
+      "slot": "head",
+      "unlockLevel": 1
+    },
+    {
+      "id": "hat",
+      "path": "wearables/hat.svg",
+      "name": "薄荷渔夫帽",
+      "slot": "head",
+      "unlockLevel": 1
+    },
+    {
+      "id": "star-clip",
+      "path": "wearables/star-clip.svg",
+      "name": "星星发夹",
+      "slot": "head",
+      "unlockLevel": 1
+    },
+    {
+      "id": "scarf",
+      "path": "wearables/scarf.svg",
+      "name": "珊瑚围巾",
+      "slot": "body",
+      "unlockLevel": 1
+    },
+    {
+      "id": "overalls",
+      "path": "wearables/overalls.svg",
+      "name": "薄荷背带装",
+      "slot": "body",
+      "unlockLevel": 6
+    },
+    {
+      "id": "cape",
+      "path": "wearables/cape.svg",
+      "name": "学习小披风",
+      "slot": "body",
+      "unlockLevel": 6
+    },
+    {
+      "id": "backpack",
+      "path": "wearables/backpack.svg",
+      "name": "小书包",
+      "slot": "back",
+      "unlockLevel": 1
+    },
+    {
+      "id": "bell",
+      "path": "wearables/bell.svg",
+      "name": "铃铛项链",
+      "slot": "accessory",
+      "unlockLevel": 1
+    },
+    {
+      "id": "badge",
+      "path": "wearables/badge.svg",
+      "name": "星星徽章",
+      "slot": "accessory",
+      "unlockLevel": 13
+    }
+  ],
+  "items": [
+    {
+      "id": "apple",
+      "path": "items/apple.svg",
+      "name": "苹果点心",
+      "category": "food"
+    },
+    {
+      "id": "carrot",
+      "path": "items/carrot.svg",
+      "name": "胡萝卜点心",
+      "category": "food"
+    },
+    {
+      "id": "biscuit",
+      "path": "items/biscuit.svg",
+      "name": "星星饼干",
+      "category": "food"
+    },
+    {
+      "id": "water",
+      "path": "items/water.svg",
+      "name": "清水",
+      "category": "care"
+    },
+    {
+      "id": "yarn",
+      "path": "items/yarn.svg",
+      "name": "彩色毛线球",
+      "category": "toy"
+    },
+    {
+      "id": "ball",
+      "path": "items/ball.svg",
+      "name": "彩虹皮球",
+      "category": "toy"
+    },
+    {
+      "id": "wand",
+      "path": "items/wand.svg",
+      "name": "星星逗宠棒",
+      "category": "toy"
+    },
+    {
+      "id": "brush",
+      "path": "items/brush.svg",
+      "name": "软毛梳",
+      "category": "care"
+    },
+    {
+      "id": "book",
+      "path": "items/book.svg",
+      "name": "学习小书",
+      "category": "learning"
+    },
+    {
+      "id": "coin",
+      "path": "items/coin.svg",
+      "name": "学习积分",
+      "category": "reward"
+    },
+    {
+      "id": "heart",
+      "path": "items/heart.svg",
+      "name": "心情",
+      "category": "status"
+    },
+    {
+      "id": "food-bowl",
+      "path": "items/food-bowl.svg",
+      "name": "饱腹",
+      "category": "status"
+    },
+    {
+      "id": "experience",
+      "path": "items/experience.svg",
+      "name": "成长经验",
+      "category": "status"
+    },
+    {
+      "id": "main-pet",
+      "path": "items/main-pet.svg",
+      "name": "主力宠物",
+      "category": "status"
+    }
+  ],
+  "rooms": [
+    {
+      "id": "study",
+      "name": "温暖学习角",
+      "path": "rooms/study.svg",
+      "petAnchor": [
+        480,
+        490
+      ]
+    },
+    {
+      "id": "spring",
+      "name": "春日小屋",
+      "path": "rooms/spring.svg",
+      "petAnchor": [
+        480,
+        490
+      ]
+    },
+    {
+      "id": "stars",
+      "name": "星光小屋",
+      "path": "rooms/stars.svg",
+      "petAnchor": [
+        480,
+        490
+      ]
+    }
+  ],
+  "actions": [
+    {
+      "id": "idle",
+      "name": "呼吸待机",
+      "durationMs": 0
+    },
+    {
+      "id": "pet",
+      "name": "摸摸",
+      "durationMs": 1200
+    },
+    {
+      "id": "feed",
+      "name": "喂食",
+      "durationMs": 2000
+    },
+    {
+      "id": "play",
+      "name": "玩耍",
+      "durationMs": 2100
+    },
+    {
+      "id": "correct",
+      "name": "答对庆祝",
+      "durationMs": 1400
+    },
+    {
+      "id": "encourage",
+      "name": "温柔鼓励",
+      "durationMs": 1600
+    },
+    {
+      "id": "upgrade",
+      "name": "升级庆祝",
+      "durationMs": 2000
+    },
+    {
+      "id": "evolve",
+      "name": "进化",
+      "durationMs": 2800
+    }
+  ]
+}

@@ -28,6 +28,8 @@ python3 scripts/generate-question-bank.py --check
 
 ## 安装到安卓设备
 
+新增宠物资源第一版：三只宠物的九种成长形态、九件换装、十四个道具/状态图标、三套家园和八种动画状态。可以保存 [离线资源预览](src/MathPet.UI/wwwroot/pet-assets/gallery.html) 后在浏览器打开；生成、打包与接入约定见 [宠物资源说明](docs/pet-assets.md)。这批完成资源准备，三宠物独立培养尚待接入。
+
 构建产物：`artifacts/mathpet-0.1.0.apk`（开发签名，包含程序集，可独立安装，不需要电脑或网络运行）。最低 Android 7.0 / API 24；包含 ARM64 和 x86_64，适合多数现代手机与对应模拟器，暂不包含仅支持32位ARM的旧设备。需要设备具有可用的 Android System WebView。
 
 1. 将 APK 传到手机，点击安装。
