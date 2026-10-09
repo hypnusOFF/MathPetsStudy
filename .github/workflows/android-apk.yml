@@ -5,6 +5,10 @@ on:
   push:
     branches: [main]
     paths:
+      - 'src/**'
+      - 'tests/MathPet.Core.Tests/**'
+      - 'global.json'
+      - 'scripts/build-android.sh'
       - '.github/workflows/android-apk.yml'
       - 'NuGet.Config'
       - 'scripts/verify-workload-packages.py'
