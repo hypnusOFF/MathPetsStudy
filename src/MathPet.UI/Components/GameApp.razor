@@ -126,7 +126,7 @@ case View.Quiz:
             <div class="flex">@for(var i=0;i<quiz.Current.Options.Length;i++){var option=i;<button class="btn secondary" disabled="@quiz.Answered" @onclick="() => answerText=option.ToString()">@option：@quiz.Current.Options[i]</button>}</div>
         }
         <form class="answer-form" @onsubmit="Submit" @onsubmit:preventDefault>
-            <label class="muted tiny" for="answer">@(quiz.Current.Interaction=="clock" && quiz.Current.DiagramTask==""?"拨动钟面，或输入时:分，如3:30":quiz.Current.Interaction=="reflect" && quiz.Current.DiagramTask==""?"点击网格交点，或输入坐标，如(6,2)":quiz.Current.Text.Contains("最简分数")?"请输入最简分数，如3/4；结果是整数时可直接输入整数":"请输入数字，题目中的单位可省略")</label><br>
+            <label class="muted tiny" for="answer">@(quiz.Current.Interaction=="clock" && quiz.Current.DiagramTask==""?"拨动钟面，或输入时:分，如3:30":quiz.Current.Interaction=="reflect" && quiz.Current.DiagramTask==""?"点击网格交点，或输入坐标，如(6,2)":quiz.Current.Options.Length>0?"请选择一个选项":quiz.Current.Text.Contains("最简分数")?"请输入最简分数，如3/4；结果是整数时可直接输入整数":"可填数字、小数、分数或万/亿写法，如20000或2万；题目中的单位可省略")</label><br>
             <input id="answer" class="answer" @bind="answerText" @bind:event="oninput" autocomplete="off" maxlength="100" placeholder="写下你的答案" disabled="@quiz.Answered" @ref="answerInput" />
             @if(answerError is not null){<p class="error-text" role="alert">@answerError</p>}
             <div class="flex"><button type="submit" class="btn" disabled="@quiz.Answered" data-testid="submit-answer">提交答案</button><button type="button" class="btn secondary" disabled="@(quiz.Answered || quiz.HintCount>=quiz.Current.Hints.Length)" @onclick="Hint">💡 给我一点提示</button></div>

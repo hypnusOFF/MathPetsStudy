@@ -205,7 +205,9 @@ public sealed class QuizSession
         if (string.IsNullOrWhiteSpace(input)) throw new ArgumentException("请先输入答案。");
         if (input.Length > 100) throw new ArgumentException("答案过长，请检查输入。");
         var q = Current;
-        var correct = AnswerChecker.IsCorrect(q,input);
+        var check=AnswerChecker.Check(q,input);
+        if(check.RetryMessage is not null)throw new ArgumentException(check.RetryMessage);
+        var correct = check.Correct;
         var points = correct ? engine.Score(q, HintCount > 0, IsChallenge && !TimedOut) : 0;
         var result = new AnswerResult(correct,points,TimedOut,input,q,HintCount > 0);
         var state = engine.State;

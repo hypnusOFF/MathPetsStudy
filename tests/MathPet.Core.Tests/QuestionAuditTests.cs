@@ -134,7 +134,9 @@ public sealed class QuestionAuditTests
             var state=new PlayerState();var engine=new GameEngine(state);
             var quiz=engine.Start(StudyMode.Practice,topic.Grade,topicId:topic.Id);
             Assert.Equal(4,quiz.Questions.Count);
-            quiz.Submit("-999");
+            var wrong=quiz.Current.Interaction=="classify"&&!quiz.Current.DiagramTask.StartsWith("read-")?"选中："
+                :quiz.Current.Options.Length>0?((int.Parse(quiz.Current.Answer)+1)%quiz.Current.Options.Length).ToString():"-999";
+            Assert.False(quiz.Submit(wrong).Correct);
             var review=engine.Start(StudyMode.Review,1,quiz.Current.Id);
             Assert.Equal(quiz.Current.TemplateId,review.Current.TemplateId);
             Assert.NotEqual(string.Join(",",quiz.Current.Diagram),string.Join(",",review.Current.Diagram));
