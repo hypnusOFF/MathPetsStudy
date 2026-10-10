@@ -1,0 +1,14 @@
+@namespace MathPet.UI.Components
+<div class="pet-scene room-canvas" data-room="@State.Room">
+    <img class="room-background" src="_content/MathPet.UI/room-assets/@(State.Room)-bg.png" alt="@RoomCatalog.Themes.Single(r=>r.Id==State.Room).Name"/>
+    @foreach(var decor in RoomCatalog.Decorations.Where(d=>State.PlacedRoomDecorations.Contains(d.Id)).OrderBy(d=>d.Layer))
+    {
+        <img @key="decor.Id" class="room-decoration" data-decoration="@decor.Id" src="_content/MathPet.UI/room-assets/@(decor.Id).png" alt="@decor.Name"
+             style="left:@(decor.X)%;top:@(decor.Y)%;width:@(decor.Width)%;height:@(decor.Height>0?$"{decor.Height}%":"auto");z-index:@decor.Layer"/>
+    }
+    <div class="room-pet">@ChildContent</div>
+</div>
+@code {
+    [Parameter, EditorRequired] public PlayerState State { get; set; } = default!;
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+}

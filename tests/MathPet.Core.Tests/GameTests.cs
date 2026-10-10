@@ -50,7 +50,7 @@ public sealed class GameTests
         Assert.Throws<InvalidOperationException>(()=>quiz.Finish());
         Assert.Throws<ArgumentException>(()=>quiz.Submit(" "));
         Assert.False(quiz.Next());quiz.Submit("5");
-        Assert.Throws<InvalidOperationException>(()=>quiz.Submit("5"));Assert.Equal(130,state.Coins);
+        Assert.Throws<InvalidOperationException>(()=>quiz.Submit("5"));Assert.Equal(PlayerState.InitialTestCoins+10,state.Coins);
     }
     [Fact] public void RepeatedCorrectAnswersHaveReducedReward()
     {
@@ -62,7 +62,7 @@ public sealed class GameTests
     [Fact] public void HintReducesRewardButNeverCostsCoins()
     {
         var state=new PlayerState();var quiz=new GameEngine(state).Start(StudyMode.Practice,1);
-        Assert.NotNull(quiz.RevealHint());var result=quiz.Submit("5");Assert.Equal(6,result.Points);Assert.Equal(126,state.Coins);
+        Assert.NotNull(quiz.RevealHint());var result=quiz.Submit("5");Assert.Equal(6,result.Points);Assert.Equal(PlayerState.InitialTestCoins+6,state.Coins);
     }
     [Fact] public void ChallengeHintsCannotUnlockIndependentPass()
     {
@@ -84,7 +84,7 @@ public sealed class GameTests
     {
         var state=new PlayerState();var engine=new GameEngine(state);
         engine.Start(StudyMode.Practice,1).Submit("0");engine.Start(StudyMode.Practice,1).Submit("1");
-        Assert.Equal(120,state.Coins);Assert.Single(state.Mistakes);Assert.Equal(2,state.Mistakes[0].WrongCount);Assert.Equal("1",state.Mistakes[0].LastAnswer);
+        Assert.Equal(PlayerState.InitialTestCoins,state.Coins);Assert.Single(state.Mistakes);Assert.Equal(2,state.Mistakes[0].WrongCount);Assert.Equal("1",state.Mistakes[0].LastAnswer);
     }
     [Fact] public void ReviewUsesVariantAndClearsOriginalOnlyWhenIndependent()
     {
@@ -120,7 +120,7 @@ public sealed class GameTests
     }
     [Fact] public void PetShoppingCannotOverdrawOrBuyPermanentItemsTwice()
     {
-        var state=new PlayerState();var engine=new GameEngine(state);
+        var state=new PlayerState{Coins=120};var engine=new GameEngine(state);
         Assert.True(engine.Buy(ItemKind.Ribbon).Success);Assert.Equal(40,state.Coins);
         Assert.False(engine.Buy(ItemKind.Ribbon).Success);Assert.False(engine.Buy(ItemKind.Toy).Success);
         Assert.Equal(40,state.Coins);Assert.True(engine.Buy(ItemKind.Food).Success);Assert.Equal(3,state.Food);

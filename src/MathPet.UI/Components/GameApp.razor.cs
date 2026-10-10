@@ -49,7 +49,12 @@ public partial class GameApp
     private async Task Equip(string slot,string id){Engine.Equip(slot,id);await Game.SaveAsync();}
     private async Task RestoreDecoration(){State.ActivePet.Accessory="";State.ActivePet.HideStageDecoration=false;await Game.SaveAsync();}
     private async Task SettingsChanged(){await Game.SaveAsync();await JS.InvokeVoidAsync("mathPet.configureSound",State.SoundEnabled);}
-    private async Task ChangeRoom(string room){if(room!="study"&&!State.HasRoom)return;State.Room=room;await Game.SaveAsync();}
+    private async Task ChangeRoom(string room){Engine.SelectRoom(room);await Game.SaveAsync();}
+    private async Task BuyRoom(string id){var result=Engine.BuyRoom(id);await Game.SaveAsync();Notify(result.Message);}
+    private async Task BuyRoomDecoration(string id){var result=Engine.BuyRoomDecoration(id);await Game.SaveAsync();Notify(result.Message);}
+    private async Task ToggleRoomDecoration(string id){Engine.PlaceRoomDecoration(id,!State.PlacedRoomDecorations.Contains(id));await Game.SaveAsync();}
+    private async Task ClearRoomDecorations(){State.PlacedRoomDecorations.Clear();await Game.SaveAsync();Notify("已收起所有房间装饰。");}
+    private async Task RefillTestCoins(){State.Coins=Math.Max(State.Coins,PlayerState.InitialTestCoins);await Game.SaveAsync();Notify("测试积分已补充。");}
     private async Task Comprehensive(string? unit)
     {
         StopTimer();quiz=Engine.StartComprehensive(State.Grade,State.Semester,unit);summary=null;view=View.Quiz;CaptureReward();PrepareQuestion();

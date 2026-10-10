@@ -5,7 +5,6 @@
         <span class="pet-shadow" aria-hidden="true"></span>
         <div class="pet-base"><img class="pet-sprite sprite-@(Species)-@(Stage)" src="@Sprite(Stage)" alt="@Name" draggable="false" /></div>
         <div class="pet-expression" aria-hidden="true"><img class="pet-sprite sprite-@(Species)-@(Stage)-closed" src="_content/MathPet.UI/pet-animation/sprites/@(Species)-@(Stage)-closed.png" /></div>
-        @if(Outfit!=""){<PetDecoration Id="@Outfit" Class="@($"pet-clothes clothes-body clothes-{Species}")"/>}
         @if(Headwear!=""){<PetDecoration Id="@Headwear" Class="@($"pet-clothes clothes-head clothes-{Species}")"/>}
         @if(Accessory!=""||Stage!="baby"&&!HideStageDecoration){<PetDecoration Id="@(Accessory!=""?Accessory:Species=="fox"?"star-clip":"bow")" Class="@($"pet-clothes clothes-accessory clothes-{Species} clothes-{Accessory} {(Accessory==""?"signature":"")}")"/>}
         @if (action == "evolve" && previousStage is not null)
@@ -24,12 +23,10 @@
     [Parameter] public string Stage { get; set; } = "baby";
     [Parameter] public string Name { get; set; } = "团团猫";
     [Parameter] public string Headwear {get;set;}="";
-    [Parameter] public string Outfit {get;set;}="";
     [Parameter] public string Accessory {get;set;}="";
     [Parameter] public bool HideStageDecoration {get;set;}
     [Parameter] public string Trigger {get;set;}="idle";
     private string lastTrigger="idle";
-    private static string Clothes(string id)=>$"_content/MathPet.UI/pet-assets/wearables/{id}.svg";
     [Parameter] public bool ReducedMotion { get; set; }
     private string action = "idle";
     private string? lastStage, lastSpecies, previousStage;

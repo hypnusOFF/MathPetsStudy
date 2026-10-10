@@ -61,17 +61,22 @@ public sealed class PetProgress
 public sealed record Wearable(string Id,string Name,string Slot,int Price);
 public sealed class PlayerState
 {
-    public int Version { get; set; } = 2;
+    public int Version { get; set; } = 3;
     public string ActiveSpecies { get; set; } = "cat";
     public List<PetProgress> Pets { get; set; } = [new(), new(){Species="rabbit",Name="糯糯",Experience=0},new(){Species="fox",Name="星星",Experience=0}];
     public HashSet<string> OwnedWearables { get; set; } = new();
     public string Room { get; set; } = "study";
+    public HashSet<string> OwnedRooms { get; set; } = ["study"];
+    public HashSet<string> OwnedRoomDecorations { get; set; } = [];
+    public HashSet<string> PlacedRoomDecorations { get; set; } = [];
     public bool ReducedMotion { get; set; }
     public bool SoundEnabled { get; set; } = true;
     [JsonIgnore] public PetProgress ActivePet => Pets.Single(p=>p.Species==ActiveSpecies);
     public int Grade { get; set; } = 1;
     public Semester Semester { get; set; }
-    public int Coins { get; set; } = 120;
+    // Temporary acceptance-test balance; remove when room decorating is approved.
+    public const int InitialTestCoins = 99999;
+    public int Coins { get; set; } = InitialTestCoins;
     [JsonIgnore] public string PetName { get=>ActivePet.Name; set=>ActivePet.Name=value; }
     [JsonIgnore] public int Fullness { get=>ActivePet.Fullness; set=>ActivePet.Fullness=value; }
     [JsonIgnore] public int Mood { get=>ActivePet.Mood; set=>ActivePet.Mood=value; }

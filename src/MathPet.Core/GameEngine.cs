@@ -62,8 +62,9 @@ public sealed class GameEngine(PlayerState state, TimeProvider? clock = null)
     }
     public static IReadOnlyList<Wearable> Wardrobe { get; } = [
         new("bow","紫色蝴蝶结","head",80),new("hat","薄荷帽","head",100),new("star-clip","星星发夹","head",90),
-        new("scarf","珊瑚围巾","body",110),new("overalls","薄荷背带衣","body",160),new("cape","淡紫披风","body",180),
-        new("backpack","小书包","accessory",140),new("bell","铃铛项链","accessory",90),new("badge","星星徽章","accessory",120)];
+        new("bell","铃铛项链","accessory",90),new("badge","星星徽章","accessory",120)];
+    public static IReadOnlyList<Wearable> RetiredWearables { get; } =
+        [new("scarf","珊瑚围巾","body",110),new("overalls","薄荷背带衣","body",160),new("cape","淡紫披风","body",180),new("backpack","小书包","accessory",140)];
     public void SelectPet(string species)
     {
         if (!State.Pets.Any(p=>p.Species==species)) throw new ArgumentException("宠物不存在。");
@@ -79,7 +80,35 @@ public sealed class GameEngine(PlayerState state, TimeProvider? clock = null)
     public void Equip(string slot,string id)
     {
         if(id!="" && (!State.OwnedWearables.Contains(id)||!Wardrobe.Any(w=>w.Id==id&&w.Slot==slot)))throw new ArgumentException("衣饰未拥有或槽位不匹配。");
-        switch(slot){case "head":State.ActivePet.Headwear=id;break;case "body":State.ActivePet.Outfit=id;break;case "accessory":State.ActivePet.Accessory=id;State.ActivePet.HideStageDecoration=true;break;default:throw new ArgumentException("槽位不存在。");}
+        switch(slot){case "head":State.ActivePet.Headwear=id;break;case "accessory":State.ActivePet.Accessory=id;State.ActivePet.HideStageDecoration=true;break;default:throw new ArgumentException("槽位不存在。");}
+    }
+    public (bool Success, string Message) BuyRoom(string id)
+    {
+        var room = RoomCatalog.Themes.SingleOrDefault(r => r.Id == id) ?? throw new ArgumentException("房间不存在。");
+        if (State.OwnedRooms.Contains(id)) return (false, "已经解锁这个背景。");
+        if (State.Coins < room.Price) return (false, "积分还不够。");
+        State.Coins -= room.Price; State.OwnedRooms.Add(id);
+        return (true, "已解锁" + room.Name);
+    }
+    public void SelectRoom(string id)
+    {
+        if (!RoomCatalog.Themes.Any(r => r.Id == id) || !State.OwnedRooms.Contains(id))
+            throw new ArgumentException("请先解锁这个背景。");
+        State.Room = id;
+    }
+    public (bool Success, string Message) BuyRoomDecoration(string id)
+    {
+        var item = RoomCatalog.Decorations.SingleOrDefault(d => d.Id == id) ?? throw new ArgumentException("装饰不存在。");
+        if (State.OwnedRoomDecorations.Contains(id)) return (false, "已经拥有这件装饰。");
+        if (State.Coins < item.Price) return (false, "积分还不够。");
+        State.Coins -= item.Price; State.OwnedRoomDecorations.Add(id);
+        return (true, "已购买" + item.Name);
+    }
+    public void PlaceRoomDecoration(string id, bool placed)
+    {
+        if (!RoomCatalog.Decorations.Any(d => d.Id == id) || !State.OwnedRoomDecorations.Contains(id))
+            throw new ArgumentException("请先购买这件装饰。");
+        if (placed) State.PlacedRoomDecorations.Add(id); else State.PlacedRoomDecorations.Remove(id);
     }
     public QuizSession StartComprehensive(int grade,Semester semester,string? unit=null)
     {
@@ -124,7 +153,7 @@ public sealed class GameEngine(PlayerState state, TimeProvider? clock = null)
             case ItemKind.Food: State.Food++; break;
             case ItemKind.Toy: State.HasToy = true; break;
             case ItemKind.Ribbon: State.HasRibbon = true; State.OwnedWearables.Add("bow"); break;
-            case ItemKind.Room: State.HasRoom = true; break;
+            case ItemKind.Room: State.HasRoom = true; State.OwnedRooms.UnionWith(["spring", "stars"]); break;
         }
         return (true,$"已购买{item.Name}，放入背包。");
     }

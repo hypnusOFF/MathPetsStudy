@@ -1,0 +1,171 @@
+{
+  "canvas": [
+    1600,
+    1000
+  ],
+  "coordinates": "item center in percent; see RoomCatalog.cs",
+  "assets": [
+    {
+      "id": "spring-bench",
+      "path": "spring-bench.png",
+      "size": [
+        1774,
+        887
+      ],
+      "sha256": "20e51ccb40991a5f12578b5cedcd3cbbee34ed793a96905af6aa0f7229005f35"
+    },
+    {
+      "id": "spring-bg",
+      "path": "spring-bg.png",
+      "size": [
+        1586,
+        992
+      ],
+      "sha256": "2dd50a5a24b50be9837dedda1354a04a6e6dfeb2c5fe06ce87b6346a68b24be3"
+    },
+    {
+      "id": "spring-cabinet",
+      "path": "spring-cabinet.png",
+      "size": [
+        1272,
+        1236
+      ],
+      "sha256": "c8b93f8471f3f2c7c86c8c5e0ca4408cc5ba6736f161a96149877344f4034835"
+    },
+    {
+      "id": "spring-picture",
+      "path": "spring-picture.png",
+      "size": [
+        1300,
+        1209
+      ],
+      "sha256": "d7a92651a95b32ee8fe466aeb61c3b1a0140118b85a90706cf99967a93b552e0"
+    },
+    {
+      "id": "spring-plant",
+      "path": "spring-plant.png",
+      "size": [
+        1024,
+        1536
+      ],
+      "sha256": "d363a1505d358d0aae1312c8e039c712365e606172bcef41071836212e841d7d"
+    },
+    {
+      "id": "spring-rug",
+      "path": "spring-rug.png",
+      "size": [
+        1774,
+        887
+      ],
+      "sha256": "c27dcf4b14f217ecf915c048c3cb8e27fb2d7f0a0f3aff090ee2590489e9ff0f"
+    },
+    {
+      "id": "stars-bed",
+      "path": "stars-bed.png",
+      "size": [
+        1586,
+        992
+      ],
+      "sha256": "3fe25b958b071ce0efe9e65800ba5e0b8eeb303d74fefff6fd315085953c4b58"
+    },
+    {
+      "id": "stars-bg",
+      "path": "stars-bg.png",
+      "size": [
+        1586,
+        992
+      ],
+      "sha256": "c769daab774c9abce3351bb5df203dc4034701d0485263b6e199258f33b1e0b1"
+    },
+    {
+      "id": "stars-mobile",
+      "path": "stars-mobile.png",
+      "size": [
+        1131,
+        1391
+      ],
+      "sha256": "f29d092bc41d3a9a98e894bb77f8194dc824136c4bda0bf03f719ccb128274cd"
+    },
+    {
+      "id": "stars-picture",
+      "path": "stars-picture.png",
+      "size": [
+        1374,
+        1145
+      ],
+      "sha256": "32105f7d1f31785474b40ac03efb4fad9492d000cb0a6f1157e2a878c0017e18"
+    },
+    {
+      "id": "stars-rug",
+      "path": "stars-rug.png",
+      "size": [
+        1774,
+        887
+      ],
+      "sha256": "8b89ffbc54a31034584a5e99e929ea023f56852c34ec3912cd721c23c6b10686"
+    },
+    {
+      "id": "stars-telescope",
+      "path": "stars-telescope.png",
+      "size": [
+        1294,
+        1216
+      ],
+      "sha256": "7cc6cd69bd99ec746518cbc22b78579756b8e2da540a428cd6b921f2073ab409"
+    },
+    {
+      "id": "study-abacus",
+      "path": "study-abacus.png",
+      "size": [
+        1326,
+        1186
+      ],
+      "sha256": "78ac069fa08855794944d8f1cf9f07a0ff4cd24338f6975dbb8eceaa2f7eb0f2"
+    },
+    {
+      "id": "study-bench",
+      "path": "study-bench.png",
+      "size": [
+        1586,
+        992
+      ],
+      "sha256": "2c9ef4ac461990702a669c93b88f4601ae2a1968b598c55c7c8a6e50080b0347"
+    },
+    {
+      "id": "study-bg",
+      "path": "study-bg.png",
+      "size": [
+        1586,
+        992
+      ],
+      "sha256": "17d1e8c05269b6fd2ca43ac586b40c7bc06743a601cc80bb94d17add077196e1"
+    },
+    {
+      "id": "study-bookcase",
+      "path": "study-bookcase.png",
+      "size": [
+        1234,
+        1274
+      ],
+      "sha256": "2dad1388dee91f974c3dad701b26e11e6bf6541b5aff1d8dfa8632f021c60f7d"
+    },
+    {
+      "id": "study-picture",
+      "path": "study-picture.png",
+      "size": [
+        1585,
+        992
+      ],
+      "sha256": "a20cc0ac106b0db184af824fa6ae83b9c83b9d3ddf238c296a1045abf0321c48"
+    },
+    {
+      "id": "study-rug",
+      "path": "study-rug.png",
+      "size": [
+        1942,
+        809
+      ],
+      "sha256": "79d1e8058c8d140885408da3e99825d09e33c2d8758ef79839be1752063f119c"
+    }
+  ]
+}

@@ -17,3 +17,17 @@ body{overscroll-behavior:none}.content{padding-bottom:35px}.sidebar{padding-top:
 .lesson-video h3 { overflow-wrap:anywhere; }
 .video-frame { width:100%; aspect-ratio:16/9; background:#181520; border-radius:12px; overflow:hidden; }
 .video-frame iframe { display:block; width:100%; height:100%; border:0; }
+
+/* A single coordinate canvas keeps the background, props and pet aligned. */
+.pet-scene.room-canvas{display:block;min-height:0;aspect-ratio:8/5;background:#f5efdf;isolation:isolate}
+.room-background{position:absolute;inset:0;width:100%;height:100%;object-fit:fill;z-index:0}
+.room-decoration{position:absolute;height:auto;transform:translate(-50%,-50%);pointer-events:none;user-select:none}
+.room-pet{position:absolute;left:50%;bottom:8%;width:45%;transform:translateX(-50%);z-index:40}
+.room-pet .pet-art{width:100%;margin:0}
+.room-preview{display:block;width:100%;aspect-ratio:8/5;object-fit:fill;border-radius:12px}
+.room-item-art{display:block;width:100%;height:125px;object-fit:contain;margin:auto}
+.room-shop-preview{max-width:680px;margin:auto}
+.content,.pet-choice{min-width:0}
+.pet-collection{grid-template-columns:repeat(3,minmax(0,1fr))}
+.pet-choice .pet-art{width:100%;max-width:180px}
+@media(max-width:700px){.pet-collection{grid-template-columns:1fr}}
