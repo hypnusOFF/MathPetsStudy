@@ -97,3 +97,5 @@ bash scripts/build-android.sh
 本轮完成项及尚未验收内容见 [交付范围与结果](docs/completion-scope.md)。视频挂接见 [对应状态](docs/research/video-mapping-status.md)，官方教材证据见 [十二册目录核验状态](docs/research/curriculum-current-status.md)。新增专项页面检查：`MATHPET_TEST_URL=http://127.0.0.1:8773 node scripts/smoke-completion.cjs`（需先启动Web）。
 
 题库后续审核与补齐结果见 [题库审核报告](docs/question-bank-audit.md)。独立验算运行 `python3 scripts/audit-question-bank.py`，其检查会在安卓CI构建前执行。
+
+教学视频入口现已改为课堂内官方播放器，拦截B站App协议跳转。支持分集切换、重载和关闭；实际课程播放仍需设备验收。验证结果及云端HTTP412限制见 [应用内教学视频](docs/in-app-video.md)。

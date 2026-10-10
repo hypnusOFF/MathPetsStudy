@@ -56,7 +56,7 @@ case View.Courses:
     break;
 case View.Lesson:
     <button class="btn ghost" @onclick="() => Navigate(View.Courses)">← 课程目录</button>
-    <details class="card video-list"><summary>相关免费教学视频</summary><p class="muted tiny">@TeachingResources.ForTopic(Topic.Id).Status。将在B站外部打开，需要网络；免费状态按最近核查记录，平台可能调整。</p>@foreach(var video in TeachingResources.ForTopic(Topic.Id).Videos){<p><a href="@video.Url" target="_blank" rel="noopener noreferrer">@video.Title</a></p>}</details>
+    <LessonVideos @key="Topic.Id" Topic="@Topic" />
     <div class="lesson-steps" aria-label="学习步骤">
         @for (var i=0; i<LessonSteps.Length; i++) { var index=i; <button class="@(lessonStep==index?"active":"")" @onclick="() => lessonStep=index">@(index+1). @LessonSteps[index]</button> }
     </div>

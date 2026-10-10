@@ -1,0 +1,31 @@
+@namespace MathPet.UI.Components
+<details class="card video-list">
+    <summary @onclick="Close">相关免费教学视频</summary>
+    <p class="muted tiny">@Resources.Status。可在课堂内观看，需要网络；免费状态按最近核查记录，平台可能调整。</p>
+    @foreach(var video in Resources.Videos)
+    {
+        <p><button type="button" class="btn secondary video-choice" aria-pressed="@(selected==video)" @onclick="()=>Select(video)">@video.Title</button></p>
+    }
+    @if(selected is not null)
+    {
+        <section class="lesson-video" aria-label="课堂视频播放器">
+            <h3>@selected.Title</h3>
+            <div class="video-frame">
+                <iframe @key="revision" src="@TeachingResources.PlayerUrl(selected)" title="@selected.Title"
+                    sandbox="allow-scripts allow-same-origin allow-forms allow-presentation"
+                    allow="autoplay; fullscreen; picture-in-picture" allowfullscreen
+                    referrerpolicy="strict-origin-when-cross-origin"></iframe>
+            </div>
+            <p class="muted tiny">点击播放器中的播放按钮开始观看。加载失败时，请检查网络后重试。</p>
+            <div class="flex"><button class="btn secondary" type="button" @onclick="()=>revision++">重新加载视频</button><button class="btn ghost" type="button" @onclick="Close">关闭视频</button></div>
+        </section>
+    }
+</details>
+@code {
+    [Parameter,EditorRequired] public Topic Topic {get;set;}=default!;
+    private TopicVideos Resources=>TeachingResources.ForTopic(Topic.Id);
+    private CourseVideo? selected;
+    private int revision;
+    private void Select(CourseVideo video){selected=video;revision++;}
+    private void Close()=>selected=null;
+}
