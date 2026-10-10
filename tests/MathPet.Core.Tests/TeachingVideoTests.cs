@@ -14,10 +14,7 @@ public sealed class TeachingVideoTests
             Assert.True(TeachingResources.IsPlayerNavigation(url));
             Assert.Contains($"bvid={video.Bvid}&p={video.Page}&",url.Query);
             Assert.Contains("autoplay=0",url.Query);Assert.Contains("danmaku=0",url.Query);
-            var browser=new Uri(TeachingResources.BrowserUrl(video));
-            Assert.Equal("www.bilibili.com",browser.Host);
-            Assert.Equal($"/video/{video.Bvid}/",browser.AbsolutePath);
-            Assert.Equal($"?p={video.Page}",browser.Query);
+
         }
     }
     [Theory]
@@ -38,6 +35,5 @@ public sealed class TeachingVideoTests
     public void InvalidVideoMetadataDoesNotBecomeAnIframeUrl(string bvid,int page)
     {
         Assert.Throws<ArgumentException>(()=>TeachingResources.PlayerUrl(new("bad","unused",page,bvid)));
-        Assert.Throws<ArgumentException>(()=>TeachingResources.BrowserUrl(new("bad","unused",page,bvid)));
     }
 }

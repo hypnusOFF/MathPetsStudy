@@ -18,11 +18,6 @@ public static class TeachingResources
             throw new ArgumentException("视频分集信息不正确。");
         return $"https://player.bilibili.com/player.html?bvid={video.Bvid}&p={video.Page.ToString(System.Globalization.CultureInfo.InvariantCulture)}&autoplay=0&danmaku=0";
     }
-    public static string BrowserUrl(CourseVideo video)
-    {
-        _=PlayerUrl(video); // Apply the same metadata validation to both entry points.
-        return $"https://www.bilibili.com/video/{video.Bvid}/?p={video.Page.ToString(System.Globalization.CultureInfo.InvariantCulture)}";
-    }
     // Only official embedded players may navigate inside the app's WebView.
     public static bool IsPlayerNavigation(Uri url)=>url.Scheme=="https"&&url.IsDefaultPort&&
         (url.Host=="player.bilibili.com"&&url.AbsolutePath=="/player.html"
