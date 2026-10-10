@@ -41,3 +41,45 @@
 .pet-motion[data-motion="reduced"] .pet-old{display:none}
 .pet-motion[data-motion="reduced"][data-action="pet"] .pet-heart,.pet-motion[data-motion="reduced"][data-action="encourage"] .pet-heart,.pet-motion[data-motion="reduced"][data-action="feed"] .pet-food,.pet-motion[data-motion="reduced"][data-action="play"] .pet-toy,.pet-motion[data-motion="reduced"][data-action="correct"] .pet-star,.pet-motion[data-motion="reduced"][data-action="upgrade"] .pet-star{opacity:1}
 @media(prefers-reduced-motion:reduce){.pet-motion *{animation:none!important;transform:none!important}.pet-motion .pet-old{display:none}.pet-motion[data-action="feed"] .pet-food,.pet-motion[data-action="play"] .pet-toy,.pet-motion[data-action="pet"] .pet-heart,.pet-motion[data-action="encourage"] .pet-heart,.pet-motion[data-action="correct"] .pet-star,.pet-motion[data-action="upgrade"] .pet-star{opacity:1}}
+
+.pet-clothes{display:block;position:absolute!important;pointer-events:none;z-index:4;filter:drop-shadow(0 2px 2px #83654d33)}
+.clothes-head{width:28%!important;height:28%!important;left:36%;top:8%}
+.clothes-head.clothes-fox{left:19%;top:17%;width:24%!important;height:24%!important}
+.clothes-body{left:29%;top:55%;width:43%!important;height:38%!important}
+.clothes-body.clothes-rabbit{left:25%;top:64%;width:40%!important;height:29%!important}
+.clothes-body.clothes-fox{left:17%;top:60%;width:35%!important;height:35%!important}
+.clothes-accessory{width:22%!important;height:22%!important;left:41%;top:49%}
+.clothes-accessory.clothes-rabbit{left:33%;top:57%}
+.clothes-accessory.clothes-rabbit.signature{filter:hue-rotate(-110deg) drop-shadow(0 2px 2px #83654d33)}
+.clothes-accessory.clothes-fox{left:28%;top:58%;width:18%!important;height:18%!important}
+.clothes-badge{left:42%;top:62%;width:18%!important;height:18%!important}
+.clothes-badge.clothes-rabbit{left:31%;top:64%}
+.clothes-badge.clothes-fox{left:23%;top:65%}
+.clothes-bell{left:38%;top:57%;width:24%!important;height:24%!important}
+.clothes-bell.clothes-rabbit{left:30%;top:62%}
+.clothes-bell.clothes-fox{left:22%;top:65%}
+.clothes-backpack{left:69%;top:53%;width:33%!important;height:33%!important;z-index:1;transform:rotate(15deg)}
+.clothes-backpack.clothes-rabbit{left:64%;top:57%;width:26%!important;height:26%!important}
+.clothes-backpack.clothes-fox{left:57%;top:54%;width:27%!important;height:27%!important}
+.pet-base{position:absolute;inset:0;mask-size:100% 100%;mask-repeat:no-repeat}
+.pet-expression,.pet-local,.pet-mouth{position:absolute;inset:0;pointer-events:none}
+.pet-expression{clip-path:ellipse(35% 17% at 52% 45%);opacity:0;animation:pet-blink 7s infinite;z-index:2}
+.pet-motion[data-action="encourage"] .pet-expression,.pet-motion[data-action="pet"] .pet-expression{animation:none;opacity:1}
+.pet-mouth{clip-path:ellipse(12% 8% at 55% 58%);opacity:0;z-index:3}
+.pet-motion[data-action="feed"] .pet-mouth{animation:mouth-chew .38s 5}
+.pet-motion[data-species="fox"] .pet-mouth{clip-path:ellipse(10% 7% at 34% 61%)}
+.pet-motion[data-species="fox"] .pet-expression{clip-path:ellipse(30% 16% at 36% 56%)}
+.local-ear{clip-path:polygon(16% 5%,86% 5%,86% 28%,16% 28%);transform-origin:50% 28%;animation:ear-soft 8s infinite;z-index:1}
+.local-tail{clip-path:polygon(0 56%,25% 56%,25% 86%,0 86%);transform-origin:25% 73%;animation:tail-soft 6s infinite}
+.local-tail.local-rabbit,.local-tail.local-fox{clip-path:polygon(75% 54%,100% 54%,100% 90%,75% 90%);transform-origin:75% 77%}
+.local-paw{clip-path:ellipse(13% 8% at 42% 84%);transform-origin:48% 88%;z-index:3}
+.pet-motion[data-action="play"] .local-paw,.pet-motion[data-action="pet"] .local-paw{animation:paw-soft .7s 2}
+.pet-motion[data-motion="reduced"] .pet-local,.pet-motion[data-motion="reduced"] .pet-expression,.pet-motion[data-motion="reduced"] .pet-mouth{animation:none!important;transform:none!important}
+@media(prefers-reduced-motion:reduce){.pet-local,.pet-expression,.pet-mouth{animation:none!important;transform:none!important}}
+@keyframes pet-blink{0%,92%,96%,100%{opacity:0}93%,95%{opacity:1}}
+@keyframes ear-soft{0%,82%,100%{transform:rotate(0)}86%{transform:rotate(-2deg)}90%{transform:rotate(2deg)}}
+@keyframes tail-soft{0%,70%,100%{transform:rotate(0)}80%{transform:rotate(-3deg)}90%{transform:rotate(3deg)}}
+@keyframes paw-soft{50%{transform:translateY(-3%) rotate(-7deg)}}
+@keyframes mouth-chew{0%,100%{opacity:0}30%,75%{opacity:1}}
+.decor-fashion{display:inline-block;background-image:url("../pet-decor/fashion-sheet.png");background-size:300% 300%;background-repeat:no-repeat}
+.decor-icon{display:inline-block;background-image:url("../pet-decor/icon-sheet.png");background-size:700% 200%;background-repeat:no-repeat;vertical-align:middle}

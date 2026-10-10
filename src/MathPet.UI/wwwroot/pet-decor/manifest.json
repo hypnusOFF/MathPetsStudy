@@ -1,0 +1,85 @@
+{
+  "art": "本项目生成的毛绒绘本风；通过CSS图集窗口显示，不剪改原始PNG",
+  "fashionOrder": [
+    "bow",
+    "hat",
+    "star-clip",
+    "scarf",
+    "overalls",
+    "cape",
+    "backpack",
+    "bell",
+    "badge"
+  ],
+  "fashionGrid": [
+    3,
+    3
+  ],
+  "iconOrder": [
+    "apple",
+    "carrot",
+    "biscuit",
+    "water",
+    "yarn",
+    "ball",
+    "wand",
+    "brush",
+    "book",
+    "coin",
+    "heart",
+    "food-bowl",
+    "experience",
+    "main-pet"
+  ],
+  "iconGrid": [
+    7,
+    2
+  ],
+  "assets": [
+    {
+      "id": "fashion-sheet",
+      "path": "fashion-sheet.png",
+      "size": [
+        1254,
+        1254
+      ],
+      "sha256": "d99416c472b2cecabb48d314789d9442096c19d6da5e765fb55657c2d05b627a"
+    },
+    {
+      "id": "icon-sheet",
+      "path": "icon-sheet.png",
+      "size": [
+        1983,
+        793
+      ],
+      "sha256": "f4b4b8555e8bb628715ee51b97e82a3e11b193d0c8088fc846cbf942c492e311"
+    },
+    {
+      "id": "room-study",
+      "path": "room-study.png",
+      "size": [
+        1586,
+        992
+      ],
+      "sha256": "da488fa4ca3fd903a434b1fabbf9599ad6f671d1e9d670d92254e13ff82be389"
+    },
+    {
+      "id": "room-spring",
+      "path": "room-spring.png",
+      "size": [
+        1586,
+        992
+      ],
+      "sha256": "ad75fdefe34b34a3ee93e580b115b0c17aed7595ded160105efbf3244721a7bc"
+    },
+    {
+      "id": "room-stars",
+      "path": "room-stars.png",
+      "size": [
+        1586,
+        992
+      ],
+      "sha256": "9d90f13565bb9cea5ef41af33373e9416c02a6488d4b3ea5dff4416af9a80493"
+    }
+  ]
+}

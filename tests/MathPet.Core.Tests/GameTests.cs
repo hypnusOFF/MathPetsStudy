@@ -139,8 +139,8 @@ public sealed class GameTests
     [Fact] public void PetMaturityDoesNotRequireMakingMistakes()
     {
         var state=new PlayerState{Growth=100,CompletedPractices=2};state.Stars["addition"]=3;
-        Assert.Equal("成熟宠",new GameEngine(state).PetStage);
-        state.CompletedPractices=0;Assert.Equal("幼宠",new GameEngine(state).PetStage);
+        state.ActivePet.Experience=PetProgress.RequiredExperience(13);Assert.Equal("最终进化",new GameEngine(state).PetStage);
+        state.ActivePet.Experience=0;Assert.Equal("幼年期",new GameEngine(state).PetStage);
     }
     [Fact] public void MerelyViewingOrUsingHintsCannotMarkMastered()
     {
@@ -160,7 +160,7 @@ public sealed class GameTests
         var restored=StateSerialization.Deserialize(StateSerialization.Serialize(state));
         Assert.Equal(state.Coins,restored.Coins);Assert.Equal(3,restored.Stars["fraction"]);Assert.True(restored.WearingRibbon);Assert.Equal("小团",restored.PetName);
     }
-    [Theory] [InlineData("null")] [InlineData("{}")] [InlineData("{\"Version\":2}")] [InlineData("{\"Grade\":7}")] [InlineData("{\"Coins\":-1}")] [InlineData("{\"Mistakes\":null}")]
+    [Theory] [InlineData("null")] [InlineData("{}")] [InlineData("{\"Version\":999}")] [InlineData("{\"Grade\":7}")] [InlineData("{\"Coins\":-1}")] [InlineData("{\"Mistakes\":null}")]
     public void CorruptOrUnknownSaveIsNotSilentlyLoaded(string json)
     {
         if(json=="{}")Assert.NotNull(StateSerialization.Deserialize(json));

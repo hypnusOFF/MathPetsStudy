@@ -8,7 +8,7 @@ public static class Curriculum
     {
         Semester = t.Grade is 3 or 4 or 5 ? Semester.Second : Semester.First,
         UnitName = t.Name, Order = 1000
-    }).Concat(LoadBank()).ToArray();
+    }).Concat(LoadBank()).Concat(VisualExercises.Create()).ToArray();
     private static readonly IReadOnlyDictionary<string, Topic> TopicIndex = Topics.ToDictionary(t => t.Id);
     private static readonly IReadOnlyDictionary<string, Question> QuestionIndex = Topics
         .SelectMany(t => t.Questions.Concat(t.ReviewQuestions)).ToDictionary(q => q.Id);

@@ -1,0 +1,92 @@
+{
+  "checked": "2026-10-10",
+  "sources": [
+    {
+      "url": "https://jc.pep.com.cn/?filed=小学&subject=数学",
+      "error": "HTTP 405（本轮实际请求）；此前曾403，未取得逐册目录"
+    },
+    {
+      "url": "https://www.pep.com.cn/xw/zt/hd/12/xjcjs/xx/202409/t20240920_1995566.html",
+      "error": "HTTP Error 503: Service Unavailable"
+    },
+    {
+      "url": "https://www.pep.com.cn/rjyx/qnbjsjc/202605/t20260514_2006676.shtml",
+      "status": 200,
+      "title": "义务教育小学数学教材"
+    }
+  ],
+  "books": [
+    {
+      "grade": 1,
+      "semester": "上册",
+      "status": "未逐册核验最新版目录",
+      "current": "样例知识点结构，不能等同官方最新完整目录"
+    },
+    {
+      "grade": 1,
+      "semester": "下册",
+      "status": "未逐册核验最新版目录",
+      "current": "样例知识点结构，不能等同官方最新完整目录"
+    },
+    {
+      "grade": 2,
+      "semester": "上册",
+      "status": "未逐册核验最新版目录",
+      "current": "样例知识点结构，不能等同官方最新完整目录"
+    },
+    {
+      "grade": 2,
+      "semester": "下册",
+      "status": "未逐册核验最新版目录",
+      "current": "样例知识点结构，不能等同官方最新完整目录"
+    },
+    {
+      "grade": 3,
+      "semester": "上册",
+      "status": "未逐册核验最新版目录",
+      "current": "样例知识点结构，不能等同官方最新完整目录"
+    },
+    {
+      "grade": 3,
+      "semester": "下册",
+      "status": "未逐册核验最新版目录",
+      "current": "样例知识点结构，不能等同官方最新完整目录"
+    },
+    {
+      "grade": 4,
+      "semester": "上册",
+      "status": "未逐册核验最新版目录",
+      "current": "样例知识点结构，不能等同官方最新完整目录"
+    },
+    {
+      "grade": 4,
+      "semester": "下册",
+      "status": "未逐册核验最新版目录",
+      "current": "样例知识点结构，不能等同官方最新完整目录"
+    },
+    {
+      "grade": 5,
+      "semester": "上册",
+      "status": "未逐册核验最新版目录",
+      "current": "样例知识点结构，不能等同官方最新完整目录"
+    },
+    {
+      "grade": 5,
+      "semester": "下册",
+      "status": "未逐册核验最新版目录",
+      "current": "样例知识点结构，不能等同官方最新完整目录"
+    },
+    {
+      "grade": 6,
+      "semester": "上册",
+      "status": "未逐册核验最新版目录",
+      "current": "样例知识点结构，不能等同官方最新完整目录"
+    },
+    {
+      "grade": 6,
+      "semester": "下册",
+      "status": "未逐册核验最新版目录",
+      "current": "样例知识点结构，不能等同官方最新完整目录"
+    }
+  ]
+}

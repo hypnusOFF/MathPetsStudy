@@ -7,7 +7,7 @@ public sealed class GameEngine(PlayerState state, TimeProvider? clock = null)
     public static readonly decimal[] GradeMultipliers = [1m, 1.3m, 1.6m, 2m, 2.5m, 3m];
     public static IReadOnlyList<ShopItem> Shop { get; } =
     [
-        new(ItemKind.Food,"苹果小点心","🍎",20,"饱腹 +20，成长 +2"),
+        new(ItemKind.Food,"苹果小点心","🍎",20,"饱腹 +20，经验 +2"),
         new(ItemKind.Toy,"彩色毛线球","🧶",50,"永久玩具，玩耍心情 +15"),
         new(ItemKind.Ribbon,"紫色蝴蝶结","🎀",80,"可穿戴装饰，不影响答题"),
         new(ItemKind.Room,"春日小屋","🌷",100,"可切换的家园装饰")
@@ -60,6 +60,37 @@ public sealed class GameEngine(PlayerState state, TimeProvider? clock = null)
         if (original is not null && !questions.Any(q => q.Id == original.Id)) questions[^1] = original;
         return new QuizSession(this, StudyMode.Daily, selected[0], questions, null);
     }
+    public static IReadOnlyList<Wearable> Wardrobe { get; } = [
+        new("bow","紫色蝴蝶结","head",80),new("hat","薄荷帽","head",100),new("star-clip","星星发夹","head",90),
+        new("scarf","珊瑚围巾","body",110),new("overalls","薄荷背带衣","body",160),new("cape","淡紫披风","body",180),
+        new("backpack","小书包","accessory",140),new("bell","铃铛项链","accessory",90),new("badge","星星徽章","accessory",120)];
+    public void SelectPet(string species)
+    {
+        if (!State.Pets.Any(p=>p.Species==species)) throw new ArgumentException("宠物不存在。");
+        State.ActiveSpecies=species;
+    }
+    public (bool Success,string Message) BuyWearable(string id)
+    {
+        var item=Wardrobe.SingleOrDefault(w=>w.Id==id) ?? throw new ArgumentException("衣饰不存在。");
+        if(State.OwnedWearables.Contains(id)) return(false,"已经拥有这件衣饰。");
+        if(State.Coins<item.Price)return(false,"积分还不够。");
+        State.Coins-=item.Price;State.OwnedWearables.Add(id);return(true,"已购买"+item.Name);
+    }
+    public void Equip(string slot,string id)
+    {
+        if(id!="" && (!State.OwnedWearables.Contains(id)||!Wardrobe.Any(w=>w.Id==id&&w.Slot==slot)))throw new ArgumentException("衣饰未拥有或槽位不匹配。");
+        switch(slot){case "head":State.ActivePet.Headwear=id;break;case "body":State.ActivePet.Outfit=id;break;case "accessory":State.ActivePet.Accessory=id;State.ActivePet.HideStageDecoration=true;break;default:throw new ArgumentException("槽位不存在。");}
+    }
+    public QuizSession StartComprehensive(int grade,Semester semester,string? unit=null)
+    {
+        var topics=Curriculum.ForSemester(grade,semester).Where(t=>(t.Order<1000||t.Order>=2000)&&(unit is null||t.UnitName==unit)).ToArray();
+        if(topics.Length==0)throw new ArgumentException("没有可用的综合关内容。");
+        var chosen=topics.OrderBy(t=>t.Order).Select(t=>t.Questions.OrderBy(q=>State.Progress.GetValueOrDefault(q.Id)?.AttemptCount??0).ThenBy(q=>q.Id).First()).ToList();
+        if(chosen.Count<3)chosen=topics.SelectMany(t=>t.Questions).GroupBy(q=>q.TemplateId).Select(g=>g.First()).Take(3).ToList();
+        if(chosen.Count>12)chosen=Enumerable.Range(0,12).Select(i=>chosen[i*chosen.Count/12]).ToList();
+        var key=$"comprehensive:{grade}:{semester}:{unit??"semester"}";
+        return new QuizSession(this,unit is null?StudyMode.SemesterChallenge:StudyMode.UnitChallenge,topics[0],chosen,null,key,unit is null?"学期综合关":unit+"单元关");
+    }
     public Mastery GetMastery(Topic topic)
     {
         if (State.Mistakes.Any(m => Curriculum.FindQuestion(m.QuestionId)?.TopicId == topic.Id)) return Mastery.NeedsReview;
@@ -80,7 +111,7 @@ public sealed class GameEngine(PlayerState state, TimeProvider? clock = null)
     public bool Owns(ItemKind kind) => kind switch
     {
         ItemKind.Food => State.Food > 0, ItemKind.Toy => State.HasToy,
-        ItemKind.Ribbon => State.HasRibbon, ItemKind.Room => State.HasRoom, _ => false
+        ItemKind.Ribbon => State.HasRibbon || State.OwnedWearables.Contains("bow"), ItemKind.Room => State.HasRoom, _ => false
     };
     public (bool Success, string Message) Buy(ItemKind kind)
     {
@@ -92,7 +123,7 @@ public sealed class GameEngine(PlayerState state, TimeProvider? clock = null)
         {
             case ItemKind.Food: State.Food++; break;
             case ItemKind.Toy: State.HasToy = true; break;
-            case ItemKind.Ribbon: State.HasRibbon = true; break;
+            case ItemKind.Ribbon: State.HasRibbon = true; State.OwnedWearables.Add("bow"); break;
             case ItemKind.Room: State.HasRoom = true; break;
         }
         return (true,$"已购买{item.Name}，放入背包。");
@@ -103,7 +134,7 @@ public sealed class GameEngine(PlayerState state, TimeProvider? clock = null)
         if (State.Fullness == 100) return $"{State.PetName}已经吃饱了，点心先存着吧。";
         State.Food--; State.Fullness = Math.Min(100, State.Fullness + 20);
         AddGrowth(2);
-        return $"{State.PetName}吃得很开心！饱腹增加，成长 +2。";
+        return $"{State.PetName}吃得很开心！饱腹增加，经验 +2。";
     }
     public string Play()
     {
@@ -115,21 +146,21 @@ public sealed class GameEngine(PlayerState state, TimeProvider? clock = null)
         State.Mood = Math.Min(100, State.Mood + 5);
         return $"{State.PetName}蹭了蹭你的手，心情增加！";
     }
-    public string PetStage => State.Growth >= 100 && State.Stars.Count > 0 && (State.ReviewedMistakes > 0 || State.CompletedPractices >= 2)
-        ? "成熟宠" : State.Growth >= 50 && State.CompletedPractices > 0 ? "成长宠" : "幼宠";
+    public string PetStage => State.ActivePet.Stage switch { "mature"=>"最终进化", "young"=>"初次进化", _=>"幼年期" };
     public void ApplyAbsence()
     {
         var now = Clock.GetUtcNow();
         var days = Math.Clamp((int)(now - State.LastSeen).TotalDays, 0, 30);
-        State.Fullness = Math.Max(30, State.Fullness - days * 5);
-        State.Mood = Math.Max(40, State.Mood - days * 3);
+        foreach(var pet in State.Pets){pet.Fullness=Math.Max(30,pet.Fullness-days*5);pet.Mood=Math.Max(40,pet.Mood-days*3);}
         State.LastSeen = now;
     }
-    internal int AddGrowth(int amount)
+    internal int AddGrowth(int amount,string? species=null)
     {
-        var before = State.Growth; State.Growth = Math.Min(100, State.Growth + amount);
-        return State.Growth - before;
+        var pet=State.Pets.Single(p=>p.Species==(species??State.ActiveSpecies));
+        var before=pet.Experience;pet.Experience=Math.Min(PetProgress.MaxExperience,pet.Experience+Math.Max(0,amount));
+        return pet.Experience-before;
     }
+
 }
 
 public sealed class QuizSession
@@ -140,6 +171,10 @@ public sealed class QuizSession
     private DateTimeOffset questionStarted;
     private readonly List<AnswerResult> answers = [];
     private SessionSummary? summary;
+    private readonly string rewardKey,summaryName;
+    public string RewardSpecies { get; }
+    public string RewardPetName { get; }
+    public bool IsChallenge => Mode is StudyMode.Challenge or StudyMode.UnitChallenge or StudyMode.SemesterChallenge;
     public StudyMode Mode { get; }
     public Topic Topic { get; }
     public IReadOnlyList<Question> Questions { get; }
@@ -150,9 +185,11 @@ public sealed class QuizSession
     public bool Completed => summary is not null;
     public AnswerResult? LastResult => answers.LastOrDefault();
     public int RemainingSeconds => Math.Max(0, Current.TimeLimitSeconds - (int)(engine.Clock.GetUtcNow() - questionStarted).TotalSeconds);
-    public bool TimedOut => Mode == StudyMode.Challenge && RemainingSeconds == 0;
-    internal QuizSession(GameEngine engine, StudyMode mode, Topic topic, IReadOnlyList<Question> questions, string? reviewOriginal)
+    public bool TimedOut => IsChallenge && RemainingSeconds == 0;
+    internal QuizSession(GameEngine engine, StudyMode mode, Topic topic, IReadOnlyList<Question> questions, string? reviewOriginal,string? rewardKey=null,string? summaryName=null)
     {
+        this.rewardKey=rewardKey??topic.Id;this.summaryName=summaryName??topic.Name;
+        RewardSpecies=engine.State.ActiveSpecies;RewardPetName=engine.State.PetName;
         this.engine = engine; Mode = mode; Topic = topic; Questions = questions; this.reviewOriginal = reviewOriginal;
         questionStarted = engine.Clock.GetUtcNow();
         localDate = DateOnly.FromDateTime(engine.Clock.GetLocalNow().DateTime);
@@ -169,7 +206,7 @@ public sealed class QuizSession
         if (input.Length > 100) throw new ArgumentException("答案过长，请检查输入。");
         var q = Current;
         var correct = AnswerChecker.IsCorrect(q,input);
-        var points = correct ? engine.Score(q, HintCount > 0, Mode == StudyMode.Challenge && !TimedOut) : 0;
+        var points = correct ? engine.Score(q, HintCount > 0, IsChallenge && !TimedOut) : 0;
         var result = new AnswerResult(correct,points,TimedOut,input,q,HintCount > 0);
         var state = engine.State;
         if (!state.Progress.TryGetValue(q.Id, out var progress)) state.Progress[q.Id] = progress = new();
@@ -211,19 +248,19 @@ public sealed class QuizSession
         var correct = answers.Count(a => a.Correct);
         // Hints help learning, but hinted answers do not satisfy an independent challenge pass.
         var independent = answers.Count(a => a.Correct && !a.UsedHint);
-        var passed = Mode == StudyMode.Challenge && independent >= (int)Math.Ceiling(Questions.Count * 2m / 3m);
+        var passed = IsChallenge && independent >= (int)Math.Ceiling(Questions.Count * 2m / 3m);
         var bonus = 0; var stars = passed ? independent == Questions.Count ? 3 : independent >= (int)Math.Ceiling(Questions.Count * .8m) ? 2 : 1 : 0;
         if (passed)
         {
-            if (!state.Stars.ContainsKey(Topic.Id)) bonus = (int)(20 * GameEngine.GradeMultipliers[Topic.Grade-1]);
-            state.Stars[Topic.Id] = Math.Max(state.Stars.GetValueOrDefault(Topic.Id), stars);
+            if (!state.Stars.ContainsKey(rewardKey)) bonus = (int)(20 * GameEngine.GradeMultipliers[Topic.Grade-1]);
+            state.Stars[rewardKey] = Math.Max(state.Stars.GetValueOrDefault(rewardKey), stars);
         }
         if (Mode is StudyMode.Daily or StudyMode.Practice) state.CompletedPractices++;
         if (Mode == StudyMode.Daily && state.DailyBonuses.Add($"{localDate:yyyy-MM-dd}")) bonus += 10;
         state.Coins += bonus;
-        var growth = engine.AddGrowth(correct * 2);
+        var growth = engine.AddGrowth(answers.Sum(a=>a.Points)/2,RewardSpecies);
         summary = new(Mode,correct,Questions.Count,answers.Sum(a => a.Points),bonus,growth,passed,stars,Topic.Grade,
-            Mode == StudyMode.Daily ? "跨知识点每日练习" : Topic.Name);
+            Mode == StudyMode.Daily ? "跨知识点每日练习" : summaryName);
         return summary;
     }
 }

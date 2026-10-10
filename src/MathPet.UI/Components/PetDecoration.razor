@@ -1,0 +1,10 @@
+<span class="@(Icon ? "decor-icon" : "decor-fashion") @Class" style="background-position:@Position" role="img" aria-label="@Label"></span>
+@code {
+ [Parameter]public string Id{get;set;}="bow";
+ [Parameter]public bool Icon{get;set;}
+ [Parameter]public string Class{get;set;}="";
+ [Parameter]public string Label{get;set;}="";
+ private static readonly string[] Fashion=["bow","hat","star-clip","scarf","overalls","cape","backpack","bell","badge"];
+ private static readonly string[] Icons=["apple","carrot","biscuit","water","yarn","ball","wand","brush","book","coin","heart","food-bowl","experience","main-pet"];
+ private string Position {get{var index=Array.IndexOf(Icon?Icons:Fashion,Id);if(index<0)throw new ArgumentException("Unknown decoration.");var columns=Icon?7:3;return $"{index%columns*100/(columns-1)}% {index/columns*(Icon?100:50)}%";}}
+}

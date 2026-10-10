@@ -18,6 +18,11 @@ for sprite in manifest['sprites']:
 for key, file in [('food', 'apple.svg'), ('toy', 'ball.svg')]:
     data = (root / 'src/MathPet.UI/wwwroot/pet-assets/items' / file).read_bytes()
     payload[key] = 'data:image/svg+xml;base64,' + base64.b64encode(data).decode()
+decor=root/'src/MathPet.UI/wwwroot/pet-decor'
+payload['decor']={}
+for entry in json.loads((decor/'manifest.json').read_text())['assets']:
+    data=(decor/entry['path']).read_bytes();assert hashlib.sha256(data).hexdigest()==entry['sha256']
+    payload['decor'][entry['id']]='data:image/png;base64,'+base64.b64encode(data).decode()
 page = (root / 'scripts/pet-motion-preview.template.html').read_text()
 page = page.replace('__MOTION_CSS__', (assets / 'motion.css').read_text().replace('@import url("sprite-layout.css");', (assets / 'sprite-layout.css').read_text()))
 page = page.replace('__PAYLOAD__', json.dumps(payload, ensure_ascii=False))
@@ -30,6 +35,8 @@ with zipfile.ZipFile(out / 'mathpet-motion-assets.zip', 'w', zipfile.ZIP_DEFLATE
             archive.write(path, 'pet-animation/' + str(path.relative_to(assets)))
     archive.write(out / 'mathpet-motion-preview.html', 'mathpet-motion-preview.html')
     archive.write(root / 'docs/pet-motion.md', 'README.md')
+    for path in sorted(decor.rglob('*')):
+        if path.is_file():archive.write(path,'pet-decor/'+path.name)
     for file in ['apple.svg', 'ball.svg']:
         archive.write(root / 'src/MathPet.UI/wwwroot/pet-assets/items' / file, 'effects/' + file)
 print(f"Verified {len(payload['sprites'])} transparent sprites, packaged offline motion preview and assets.")

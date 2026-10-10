@@ -37,7 +37,24 @@ public partial class GameApp
     private Topic Topic => SemesterTopics.FirstOrDefault(t => t.Id == selectedTopicId) ?? SemesterTopics[0];
     private string GradeName => Curriculum.GradeNames[State.Grade-1];
     private PetPortrait? petPortrait;
-    private string VisualStage => Engine.PetStage switch { "成熟宠" => "mature", "成长宠" => "young", _ => "baby" };
+    private string VisualStage => State.ActivePet.Stage;
+    private string feedbackAction="idle",resultAction="idle";
+    private string rewardSpecies="cat",rewardName="团团";
+    private PetProgress RewardPet=>State.Pets.Single(p=>p.Species==rewardSpecies);
+    private int rewardLevel; private string rewardStage="baby";
+    private Task RemoveClothes(string slot)=>Equip(slot, "");
+    private void CaptureReward(){rewardSpecies=quiz!.RewardSpecies;rewardName=quiz.RewardPetName;var pet=State.Pets.Single(p=>p.Species==rewardSpecies);rewardLevel=pet.Level;rewardStage=pet.Stage;}
+    private async Task SelectPet(string species){Engine.SelectPet(species);await Game.SaveAsync();}
+    private async Task BuyClothes(string id){var result=Engine.BuyWearable(id);await Game.SaveAsync();Notify(result.Message);}
+    private async Task Equip(string slot,string id){Engine.Equip(slot,id);await Game.SaveAsync();}
+    private async Task RestoreDecoration(){State.ActivePet.Accessory="";State.ActivePet.HideStageDecoration=false;await Game.SaveAsync();}
+    private async Task SettingsChanged(){await Game.SaveAsync();await JS.InvokeVoidAsync("mathPet.configureSound",State.SoundEnabled);}
+    private async Task ChangeRoom(string room){if(room!="study"&&!State.HasRoom)return;State.Room=room;await Game.SaveAsync();}
+    private async Task Comprehensive(string? unit)
+    {
+        StopTimer();quiz=Engine.StartComprehensive(State.Grade,State.Semester,unit);summary=null;view=View.Quiz;CaptureReward();PrepareQuestion();
+        timerCancel=new();timerTask=RunTimer(timerCancel.Token);await JS.InvokeVoidAsync("mathPet.scrollTop");
+    }
     private string PageTitle => view switch
     {
         View.Home=>"今天，也进步一点点",View.Courses=>"学习课堂",View.Lesson=>"一起来学新知识",
@@ -47,7 +64,7 @@ public partial class GameApp
     };
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if(firstRender){await Game.LoadAsync();loaded=true;await Game.SaveAsync();StateHasChanged();return;}
+        if(firstRender){await Game.LoadAsync();loaded=true;await Game.SaveAsync();await JS.InvokeVoidAsync("mathPet.configureSound",State.SoundEnabled);StateHasChanged();return;}
         if(focusAnswer){focusAnswer=false;await answerInput.FocusAsync();}
         if(focusModal){focusModal=false;await modalElement.FocusAsync();}
     }
@@ -80,8 +97,8 @@ public partial class GameApp
     {
         StopTimer();quiz=mode==StudyMode.Daily ? Engine.StartDaily(State.Grade,State.Semester)
             : Engine.Start(mode,State.Grade,mistakeId,mode==StudyMode.Review ? null : Topic.Id);summary=null;view=View.Quiz;
-        PrepareQuestion();
-        if(mode==StudyMode.Challenge)
+        CaptureReward();PrepareQuestion();
+        if(quiz.IsChallenge)
         {
             timerCancel=new();var token=timerCancel.Token;
             timerTask=RunTimer(token);
@@ -95,33 +112,35 @@ public partial class GameApp
         catch(OperationCanceledException){}
     }
     private void StopTimer(){timerCancel?.Cancel();timerCancel?.Dispose();timerCancel=null;}
-    private void PrepareQuestion(){answerText="";answerError=null;revealedHints=[];focusAnswer=true;}
+    private void PrepareQuestion(){answerText="";answerError=null;revealedHints=[];focusAnswer=true;feedbackAction="idle";}
     private void Hint(){var hint=quiz?.RevealHint();if(hint is not null)revealedHints.Add($"提示 {quiz!.HintCount}：{hint}");}
     private async Task Submit()
     {
         if(quiz is null||quiz.Answered)return;
-        try{quiz.Submit(answerText);answerError=null;await Game.SaveAsync();}
+        try{var result=quiz.Submit(answerText);feedbackAction=result.Correct?"correct":"encourage";answerError=null;await Game.SaveAsync();await Sound(feedbackAction);}
         catch(ArgumentException ex){answerError=ex.Message;}
     }
     private async Task Next()
     {
         if(quiz is null||!quiz.Answered)return;
         if(quiz.Next()){PrepareQuestion();return;}
-        summary=quiz.Finish();view=View.Result;StopTimer();await Game.SaveAsync();
+        summary=quiz.Finish();var pet=State.Pets.Single(p=>p.Species==rewardSpecies);resultAction=pet.Stage!=rewardStage?"evolve":pet.Level>rewardLevel?"upgrade":summary.Correct>0?"correct":"encourage";view=View.Result;StopTimer();await Game.SaveAsync();await Sound(resultAction);
         await JS.InvokeVoidAsync("mathPet.scrollTop");
     }
     private async Task Feed()
     {
         var food=State.Food; var stage=VisualStage; var text=Engine.Feed();
         await Game.SaveAsync(); Notify(text);
+        if(State.Food<food)await Sound("feed");
         if(view==View.Pet && petPortrait is not null && State.Food<food && stage==VisualStage)
             await petPortrait.PlayAsync("feed");
     }
-    private async Task Play(){var text=Engine.Play();await Game.SaveAsync();Notify(text);if(view==View.Pet && petPortrait is not null)await petPortrait.PlayAsync("play");}
-    private async Task Care(){var text=Engine.Care();await Game.SaveAsync();Notify(text);if(view==View.Pet && petPortrait is not null)await petPortrait.PlayAsync("pet");}
+    private async Task Play(){var text=Engine.Play();await Game.SaveAsync();Notify(text);await Sound("play");if(view==View.Pet && petPortrait is not null)await petPortrait.PlayAsync("play");}
+    private async Task Care(){var text=Engine.Care();await Game.SaveAsync();Notify(text);await Sound("pet");if(view==View.Pet && petPortrait is not null)await petPortrait.PlayAsync("pet");}
+    private async Task Sound(string name){if(State.SoundEnabled)try{await JS.InvokeVoidAsync("mathPet.sound",name);}catch(JSException){}}
     private async Task Buy(ItemKind kind){var result=Engine.Buy(kind);await Game.SaveAsync();Notify(result.Message);}
     private string UseLabel(ItemKind kind)=>kind switch
-    {ItemKind.Food=>"喂给"+State.PetName,ItemKind.Toy=>"一起玩",ItemKind.Ribbon=>State.WearingRibbon?"摘下":"戴上",_=>State.UsingRoom?"恢复默认小屋":"布置家园"};
+    {ItemKind.Food=>"喂给"+State.PetName,ItemKind.Toy=>"一起玩",ItemKind.Ribbon=>State.WearingRibbon?"摘下":"戴上",_=>State.Room!="study"?"恢复默认小屋":"布置家园"};
     private async Task Use(ItemKind kind)
     {
         if(!Engine.Owns(kind))return;
@@ -130,7 +149,7 @@ public partial class GameApp
             case ItemKind.Food:await Feed();return;
             case ItemKind.Toy:await Play();return;
             case ItemKind.Ribbon:State.WearingRibbon=!State.WearingRibbon;Notify(State.WearingRibbon?"已戴上蝴蝶结":"已摘下蝴蝶结");break;
-            case ItemKind.Room:State.UsingRoom=!State.UsingRoom;Notify("家园布置已更新。");break;
+            case ItemKind.Room:State.Room=State.Room=="study"?"spring":"study";State.UsingRoom=State.Room!="study";Notify("家园布置已更新。");break;
         }
         await Game.SaveAsync();
     }

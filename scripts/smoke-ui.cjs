@@ -11,7 +11,7 @@ const bankAnswers=new Map(bank.flatMap(t=>[...t.Questions,...t.ReviewQuestions])
   const errors=[];page.on('pageerror',e=>errors.push(e.message));
   const base=process.env.MATHPET_TEST_URL || 'http://127.0.0.1:8766';
   const nav=label=>page.getByRole('navigation',{name:'主导航'}).getByRole('button',{name:new RegExp(label+'$')}).click();
-  const stored=()=>page.evaluate(()=>JSON.parse(localStorage.getItem('math-pet-csharp-v1')));
+  const stored=()=>page.evaluate(()=>{const state=JSON.parse(localStorage.getItem('math-pet-csharp-v1'));const pet=state.Pets.find(p=>p.Species===state.ActiveSpecies);return {...state,PetName:pet.Name,WearingRibbon:pet.Headwear==='bow'};});
   const answer=async(text)=>{await page.locator('#answer').fill(text);await page.getByTestId('submit-answer').click();await page.getByTestId('answer-feedback').waitFor();await page.getByTestId('next-question').click();await page.getByTestId('answer-feedback').waitFor({state:'hidden'});};
   await page.goto(base);await page.getByRole('heading',{name:'今天，也进步一点点'}).waitFor();
   await page.getByRole('button',{name:'重置本机进度',exact:true}).click();await page.getByRole('button',{name:'确认重置',exact:true}).click();await page.getByRole('dialog').waitFor({state:'hidden'});
@@ -21,7 +21,7 @@ const bankAnswers=new Map(bank.flatMap(t=>[...t.Questions,...t.ReviewQuestions])
     assert.doesNotMatch(await page.locator('body').innerText(),/@State\./);
   };
   await checkPetLinks('团团');
-  await nav('学习课堂');await page.locator('[data-topic-id=addition]').getByRole('button',{name:'去学习 →'}).click();await page.getByRole('button',{name:'3. 例题演示'}).click();await page.locator('details').nth(1).locator('summary').click();assert.match(await page.locator('main').innerText(),/选择加法/);
+  await nav('学习课堂');await page.locator('[data-topic-id=addition]').getByRole('button',{name:'去学习 →'}).click();await page.getByRole('button',{name:'3. 例题演示'}).click();await page.locator('details').filter({has:page.getByText('第 2 步',{exact:true})}).locator('summary').click();assert.match(await page.locator('main').innerText(),/选择加法/);
   await nav('每日练习');await page.getByRole('button',{name:'开始今日练习 →'}).click();
   // Empty answer stays on the question without granting points.
   await page.getByTestId('submit-answer').click();await page.getByText('请先输入答案。',{exact:true}).waitFor();
@@ -34,7 +34,7 @@ const bankAnswers=new Map(bank.flatMap(t=>[...t.Questions,...t.ReviewQuestions])
   await nav('宠物家园');await page.getByRole('button',{name:'小岛商店',exact:true}).click();
   await page.getByText('把每一点学习收获，变成团团 的小小快乐。',{exact:true}).waitFor();
   const item=name=>page.locator('.shop-item').filter({has:page.getByRole('heading',{name,exact:true})});
-  await item('紫色蝴蝶结').getByRole('button',{name:'购买',exact:true}).click();await page.getByRole('button',{name:'查看背包'}).click();await item('紫色蝴蝶结').getByRole('button',{name:'戴上',exact:true}).click();
+  await item('紫色蝴蝶结').getByRole('button',{name:'购买衣饰',exact:true}).click();await page.getByRole('button',{name:'查看背包'}).click();await item('紫色蝴蝶结').getByRole('button',{name:'穿给团团',exact:true}).click();
   await page.getByRole('button',{name:'← 宠物家园'}).click();const food=(await stored()).Food;await page.getByTestId('feed').click();await page.waitForFunction(n=>JSON.parse(localStorage.getItem('math-pet-csharp-v1')).Food===n-1,food);
   await page.getByRole('button',{name:'改名字',exact:true}).click();await page.locator('#pet-name').fill('小团');await page.getByRole('button',{name:'保存名字',exact:true}).click();await page.getByRole('dialog').waitFor({state:'hidden'});
   await nav('学习首页');await checkPetLinks('小团');

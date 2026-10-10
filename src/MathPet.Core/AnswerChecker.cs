@@ -9,6 +9,24 @@ public static partial class AnswerChecker
     public static bool IsCorrect(Question question, string input)
     {
         var text = Normalize(input);
+        if(question.Interaction=="classify" && text.StartsWith("选中："))
+        {
+            var selected=text[3..].Split('、',StringSplitOptions.RemoveEmptyEntries);
+            if(selected.Any(x=>!int.TryParse(x,out _)))return false;
+            return selected.Select(int.Parse).Order().SequenceEqual(question.Diagram.Select((x,i)=>(x,i)).Where(p=>p.x==3).Select(p=>p.i+1));
+        }
+        if(question.Interaction=="reflect" && (text.Contains(',')||text.Contains('，')))
+        {
+            var coordinates=text.Trim('(',')','（','）').Replace('，',',').Split(',');
+            if(coordinates.Length!=2||!int.TryParse(coordinates[0],out var x)||!int.TryParse(coordinates[1],out var y)||x is <0 or >7||y is <0 or >5)return false;
+            text=(x*10+y).ToString(CultureInfo.InvariantCulture);
+        }
+        if(question.Interaction=="clock" && text.Contains(':'))
+        {
+            var parts=text.Split(':');
+            if(parts.Length!=2||!int.TryParse(parts[0],out var hour)||!int.TryParse(parts[1],out var minute)||hour is <1 or >12||minute is <0 or >59)return false;
+            text=(hour*100+minute).ToString(CultureInfo.InvariantCulture);
+        }
         if (question.Unit is { } unit && text.EndsWith(unit, StringComparison.Ordinal))
             text = text[..^unit.Length];
         return TryRational(text, out var numerator, out var denominator)

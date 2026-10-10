@@ -1,6 +1,7 @@
+using System.Text.Json.Serialization;
 namespace MathPet.Core;
 
-public enum StudyMode { Daily, Practice, Challenge, Review }
+public enum StudyMode { Daily, Practice, Challenge, Review, UnitChallenge, SemesterChallenge }
 public enum Semester { First, Second }
 public enum Mastery { NotStarted, Learning, NeedsReview, Mastered }
 public enum ItemKind { Food, Toy, Ribbon, Room }
@@ -13,6 +14,8 @@ public sealed record Question(string Id, int Grade, string TopicId, string Text,
     public string TemplateId { get; init; } = "legacy";
     public string[] Options { get; init; } = [];
     public string Source { get; init; } = "独立原创";
+    public string? Interaction { get; init; }
+    public int[] Diagram { get; init; } = [];
 }
 public sealed record Topic(string Id, int Grade, string Name, string Area, string Goal,
     string Explanation, string Visual, string[] ExampleSteps, IReadOnlyList<Question> Questions,
@@ -37,16 +40,40 @@ public sealed class QuestionProgress
     public int AttemptCount { get; set; }
     public DateTimeOffset? LastCorrect { get; set; }
 }
+public sealed class PetProgress
+{
+    public string Species { get; set; } = "cat";
+    public string Name { get; set; } = "团团";
+    public int Experience { get; set; } = 20;
+    public int Fullness { get; set; } = 65;
+    public int Mood { get; set; } = 80;
+    public string Headwear { get; set; } = "";
+    public string Outfit { get; set; } = "";
+    public string Accessory { get; set; } = "";
+    public bool HideStageDecoration { get; set; }
+    [JsonIgnore] public int Level => Enumerable.Range(1,20).Last(l => Experience >= RequiredExperience(l));
+    [JsonIgnore] public string Stage => Level >= 13 ? "mature" : Level >= 6 ? "young" : "baby";
+    public static int RequiredExperience(int level) => (level-1)*25 + (level-1)*level*5/2;
+    public const int MaxExperience = 1425;
+}
+public sealed record Wearable(string Id,string Name,string Slot,int Price);
 public sealed class PlayerState
 {
-    public int Version { get; set; } = 1;
+    public int Version { get; set; } = 2;
+    public string ActiveSpecies { get; set; } = "cat";
+    public List<PetProgress> Pets { get; set; } = [new(), new(){Species="rabbit",Name="糯糯",Experience=0},new(){Species="fox",Name="星星",Experience=0}];
+    public HashSet<string> OwnedWearables { get; set; } = new();
+    public string Room { get; set; } = "study";
+    public bool ReducedMotion { get; set; }
+    public bool SoundEnabled { get; set; } = true;
+    [JsonIgnore] public PetProgress ActivePet => Pets.Single(p=>p.Species==ActiveSpecies);
     public int Grade { get; set; } = 1;
     public Semester Semester { get; set; }
     public int Coins { get; set; } = 120;
-    public string PetName { get; set; } = "团团";
-    public int Fullness { get; set; } = 65;
-    public int Mood { get; set; } = 80;
-    public int Growth { get; set; } = 20;
+    [JsonIgnore] public string PetName { get=>ActivePet.Name; set=>ActivePet.Name=value; }
+    [JsonIgnore] public int Fullness { get=>ActivePet.Fullness; set=>ActivePet.Fullness=value; }
+    [JsonIgnore] public int Mood { get=>ActivePet.Mood; set=>ActivePet.Mood=value; }
+    [JsonIgnore] public int Growth { get=>Math.Min(100,ActivePet.Experience); set=>ActivePet.Experience=value; }
     public int Food { get; set; } = 2;
     public bool HasToy { get; set; }
     public bool HasRibbon { get; set; }

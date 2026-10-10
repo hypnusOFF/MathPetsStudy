@@ -129,7 +129,7 @@ public sealed class QuestionBankTests
     public void SameQuestionTextCannotHaveConflictingAnswersAcrossTopics()
     {
         var questions = Curriculum.Topics.SelectMany(t => t.Questions.Concat(t.ReviewQuestions));
-        foreach (var group in questions.GroupBy(q => q.Text))
+        foreach (var group in questions.GroupBy(q => (q.Text, Diagram:string.Join(",",q.Diagram))))
             Assert.All(group, q => Assert.True(AnswerChecker.IsCorrect(group.First(), q.Answer), q.Text));
     }
 
