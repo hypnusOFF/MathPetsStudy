@@ -83,3 +83,16 @@
 @keyframes mouth-chew{0%,100%{opacity:0}30%,75%{opacity:1}}
 .decor-fashion{display:inline-block;background-image:url("../pet-decor/fashion-sheet.png");background-size:300% 300%;background-repeat:no-repeat}
 .decor-icon{display:inline-block;background-image:url("../pet-decor/icon-sheet.png");background-size:700% 200%;background-repeat:no-repeat;vertical-align:middle}
+
+/* Keep complete paintings: independently rotated cutouts expose seams and holes. */
+.pet-base{mask-image:none!important;animation:pet-open-eyes 7s infinite}
+.pet-expression,.pet-motion[data-species="fox"] .pet-expression{clip-path:none}
+.pet-mouth,.pet-local{display:none}
+.pet-motion[data-action="pet"] .pet-base,.pet-motion[data-action="encourage"] .pet-base{animation:none;opacity:0}
+.pet-motion[data-action="feed"] .pet-expression{animation:mouth-chew .38s 5}
+.pet-motion[data-action="feed"] .pet-base{animation:pet-chew-open .38s 5}
+@keyframes pet-open-eyes{0%,92%,96%,100%{opacity:1}93%,95%{opacity:0}}
+@keyframes pet-chew-open{0%,100%{opacity:1}30%,75%{opacity:0}}
+.pet-motion[data-motion="reduced"] .pet-base{opacity:1!important}
+.pet-motion[data-motion="reduced"] .pet-expression{opacity:0!important}
+@media(prefers-reduced-motion:reduce){.pet-motion .pet-base{opacity:1!important}.pet-motion .pet-expression{opacity:0!important}}

@@ -1,4 +1,5 @@
 @namespace MathPet.UI.Components
+@inject IServiceProvider Services
 <details class="card video-list">
     <summary @onclick="Close">相关免费教学视频</summary>
     <p class="muted tiny">@Resources.Status。可在课堂内观看，需要网络；免费状态按最近核查记录，平台可能调整。</p>
@@ -26,6 +27,15 @@
     private TopicVideos Resources=>TeachingResources.ForTopic(Topic.Id);
     private CourseVideo? selected;
     private int revision;
-    private void Select(CourseVideo video){selected=video;revision++;}
+    private async Task Select(CourseVideo video)
+    {
+        if(Services.GetService(typeof(MathPet.UI.ITeachingVideoPlayer)) is MathPet.UI.ITeachingVideoPlayer player)
+        {
+            Close();
+            await player.OpenAsync(video);
+            return;
+        }
+        selected=video;revision++;
+    }
     private void Close()=>selected=null;
 }

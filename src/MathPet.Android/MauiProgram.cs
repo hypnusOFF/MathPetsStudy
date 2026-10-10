@@ -9,6 +9,7 @@ public static class MauiProgram
         builder.Services.AddMauiBlazorWebView();
         builder.Services.AddSingleton<IPlayerStore,FilePlayerStore>();
         builder.Services.AddSingleton<GameState>();
+        builder.Services.AddSingleton<ITeachingVideoPlayer,AndroidTeachingVideoPlayer>();
         return builder.Build();
     }
 }

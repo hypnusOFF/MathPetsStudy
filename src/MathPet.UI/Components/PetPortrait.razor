@@ -1,11 +1,10 @@
 @implements IDisposable
+@inject IJSRuntime JS
 <div class="pet-art" style="animation:none">
-    <div class="pet-motion" data-action="@action" data-species="@Species" data-motion="@(ReducedMotion ? "reduced" : "full")" style="--pet-duration:@(Duration(action))ms" @key="serial">
+    <div class="pet-motion" @ref="motion" data-action="@action" data-species="@Species" data-motion="@(ReducedMotion ? "reduced" : "full")" style="--pet-duration:@(Duration(action))ms">
         <span class="pet-shadow" aria-hidden="true"></span>
-        <div class="pet-base" style="mask-image:url(@Mask)"><img class="pet-sprite sprite-@(Species)-@(Stage)" src="@Sprite(Stage)" alt="@Name" draggable="false" /></div>
+        <div class="pet-base"><img class="pet-sprite sprite-@(Species)-@(Stage)" src="@Sprite(Stage)" alt="@Name" draggable="false" /></div>
         <div class="pet-expression" aria-hidden="true"><img class="pet-sprite sprite-@(Species)-@(Stage)-closed" src="_content/MathPet.UI/pet-animation/sprites/@(Species)-@(Stage)-closed.png" /></div>
-        <div class="pet-mouth" aria-hidden="true"><img class="pet-sprite sprite-@(Species)-@(Stage)-closed" src="_content/MathPet.UI/pet-animation/sprites/@(Species)-@(Stage)-closed.png" /></div>
-        @foreach(var part in new[]{"ear","tail","paw"}){<div class="pet-local local-@part local-@Species" aria-hidden="true"><img class="pet-sprite sprite-@(Species)-@(Stage)" src="@Sprite(Stage)" /></div>}
         @if(Outfit!=""){<PetDecoration Id="@Outfit" Class="@($"pet-clothes clothes-body clothes-{Species}")"/>}
         @if(Headwear!=""){<PetDecoration Id="@Headwear" Class="@($"pet-clothes clothes-head clothes-{Species}")"/>}
         @if(Accessory!=""||Stage!="baby"&&!HideStageDecoration){<PetDecoration Id="@(Accessory!=""?Accessory:Species=="fox"?"star-clip":"bow")" Class="@($"pet-clothes clothes-accessory clothes-{Species} clothes-{Accessory} {(Accessory==""?"signature":"")}")"/>}
@@ -32,10 +31,10 @@
     private string lastTrigger="idle";
     private static string Clothes(string id)=>$"_content/MathPet.UI/pet-assets/wearables/{id}.svg";
     [Parameter] public bool ReducedMotion { get; set; }
-    private string Mask=>"data:image/svg+xml,"+Uri.EscapeDataString("<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><defs><mask id='m'><rect width='100' height='100' fill='white'/><polygon points='16,5 86,5 86,28 16,28' fill='black'/><polygon points='"+(Species=="cat"?"0,56 25,56 25,86 0,86":"75,54 100,54 100,90 75,90")+"' fill='black'/><ellipse cx='42' cy='84' rx='13' ry='8' fill='black'/></mask></defs><rect width='100' height='100' fill='white' mask='url(#m)'/></svg>");
     private string action = "idle";
     private string? lastStage, lastSpecies, previousStage;
-    private int serial;
+    private ElementReference motion;
+    private bool restartAnimation;
     private bool disposed;
     private CancellationTokenSource? playback;
     private string Sprite(string stage) => $"_content/MathPet.UI/pet-animation/sprites/{Species}-{stage}.png";
@@ -63,19 +62,25 @@
         if (duration == 0) throw new ArgumentException("Unknown pet animation.");
         playback?.Cancel();
         var current = new CancellationTokenSource(); playback = current;
-        action = value; serial++;
+        action = value; restartAnimation=true;
         await InvokeAsync(StateHasChanged);
         try
         {
             await Task.Delay(duration, current.Token);
             if (!disposed && playback == current)
             {
-                action = "idle"; previousStage = null; serial++;
+                action = "idle"; previousStage = null;
                 await InvokeAsync(StateHasChanged);
             }
         }
         catch (OperationCanceledException) { }
         finally { if (playback == current) playback = null; current.Dispose(); }
+    }
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if(!restartAnimation||disposed)return;
+        restartAnimation=false;
+        await JS.InvokeVoidAsync("mathPet.restartPetMotion",motion);
     }
     public void Dispose() { disposed = true; playback?.Cancel(); }
 }

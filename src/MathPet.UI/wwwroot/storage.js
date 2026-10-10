@@ -5,6 +5,12 @@
   load:()=>localStorage.getItem('math-pet-csharp-v1'),
   save:value=>{localStorage.setItem('math-pet-csharp-v1',value);try{enabled=JSON.parse(value).SoundEnabled!==false;}catch{}},
   configureSound:value=>{enabled=value;},
+  restartPetMotion:element=>{
+   // Restart the interaction without removing decoded sprites from the DOM.
+   for(const animation of element.getAnimations({subtree:true})){
+    if(animation.effect?.target.closest('.pet-motion')===element){animation.cancel();animation.play();}
+   }
+  },
   scrollTop:()=>window.scrollTo({top:0,behavior:'instant'}),
   sound:async name=>{if(!enabled)return;try{context??=new(window.AudioContext||window.webkitAudioContext)();await context.resume();(tones[name]||[523]).forEach((f,i)=>{const o=context.createOscillator(),g=context.createGain(),t=context.currentTime+i*.11;o.type='sine';o.frequency.value=f;g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(.035,t+.01);g.gain.exponentialRampToValueAtTime(.0001,t+.16);o.connect(g);g.connect(context.destination);o.start(t);o.stop(t+.17);});}catch{}}
  };
