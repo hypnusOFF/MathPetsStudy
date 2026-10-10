@@ -83,6 +83,7 @@ jobs:
       - name: Verify core rules
         run: |
           python3 scripts/generate-question-bank.py --check
+          python3 scripts/audit-question-bank.py
           python3 scripts/ci-command.py dotnet restore tests/MathPet.Core.Tests/MathPet.Core.Tests.csproj --locked-mode
           python3 scripts/ci-command.py dotnet test tests/MathPet.Core.Tests/MathPet.Core.Tests.csproj --no-restore
       - name: Build self-contained development APK

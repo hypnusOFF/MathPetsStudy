@@ -33,8 +33,8 @@ def fraction(x):
 
 
 def q(text, value, calculation, method, work, mistake, kind, unit=None, seconds=60, options=None):
-    return dict(Text=text, Answer=fmt(value), Unit=unit,
-                Hints=[method, work], Solution=[method, work, f"所以答案为 {fmt(value)}{unit or ''}。"],
+    return dict(Text=text, Answer=fraction(value) if "最简分数" in text else fmt(value), Unit=unit,
+                Hints=[method, work], Solution=[method, work, f"所以答案为 {fraction(value) if '最简分数' in text else fmt(value)}{unit or ''}。"],
                 CommonMistake=mistake, TimeLimitSeconds=seconds,
                 Difficulty=1.25 if kind in ('生活应用', '反向求量', '多步应用', '推理挑战') else 1,
                 QuestionType=kind, Options=options or [], Calculation=calculation, Source="独立原创")
@@ -65,6 +65,7 @@ def arithmetic(c, k, n):
     else:
         if c.get('decimal'): b = F(2 + n % 7, 10)
         else: b = (10+n%20) if c.get('two_digit_divisor') else 2 + n % (8 if c.get('table') else 17)
+        if c.get('table'): a = 2 + n % 8
         a *= b; result = F(a) / F(b); method = '总量÷份数=每份数量。'
     sign = {'+': '+', '-': '−', '*': '×', '/': '÷'}[op]
     work = f'{fmt(a)} {sign} {fmt(b)} = {fmt(result)}。'
@@ -86,7 +87,7 @@ def arithmetic(c, k, n):
 
 
 def numbers(c, k, n):
-    maximum = c['limit']; a = 1 + n % max(2, maximum - 1)
+    maximum = c['limit']; minimum = c.get('minimum', 1); a = minimum + n % max(1, maximum - minimum)
     if c.get('place'):
         place = c['place']; digit = 1 + n % max(1,min(9,maximum//place-1)); other = (n * 17) % place
         a = digit * place + other
@@ -244,6 +245,15 @@ def special(c,k,n):
         texts=[f'袋里有{a}个红球、{b}个蓝球，一共多少球？',f'袋里有{a+b}个球，其中红球{a}个，蓝球有多少个？',f'袋里有{a}个红球、{b}个蓝球。要让红球比蓝球至少多1个，最少再放几个红球？','',f'袋里只有{a}个红球和{b}个蓝球，摸到黄球是否可能？（可能选1，不可能选0）']
         v=[a+b,b,max(0,b+1-a),0,0][k];e=[f'{a}+{b}',f'{a+b}-{a}',str(max(0,b+1-a)),'0','0'][k]
         return q(texts[k],v,e,'先明确袋里有哪些球，以及每种球的个数。',f'根据已有球的颜色与数量，答案为{v}。','没有放入的颜色不可能摸到。',['总量计算','补缺数量','可能性比较','','事件判断'][k],options=['不可能','可能'] if k==4 else None)
+    if mode=='whole-clock':
+        hour=1+n%10
+        if k==3:return judge(f'分针指向12、时针指向{hour}，是{hour+1}时。',False,f'分针指向12表示整时，时针指向{hour}，所以是{hour}时。','整时读时针，不能把时针指向的数再加1。')
+        rows=[(f'分针指向12、时针指向{hour}，是几时？',hour,'整时读数',f'整时先看分针是否指向12，再读时针：{hour}时。'),
+              (f'现在是{hour}时，再过1小时是几时？',hour+1,'整时先后',f'{hour}＋1＝{hour+1}时。'),
+              (f'现在是{hour+1}时，1小时前是几时？',hour,'生活应用',f'{hour+1}−1＝{hour}时。'),
+              None,(f'钟表显示{hour}时整，短短的时针指向数字几？',hour,'指针辨认',f'长的分针指向12，短的时针指向{hour}。')]
+        text,value,kind,work=rows[k]
+        return q(text,value,str(value),'长针是分针，短针是时针；分针指向12表示整时。',work,'不要把时针与分针读反。',kind,seconds=45)
     if mode in ('clock','elapsed'):
         hour=1+n%10;minute=5*(n%12);duration=10+5*(n%8);end=hour*60+minute+duration
         if k==3:return judge(f'从{hour}时{minute}分到{end//60}时{end%60}分，经过{duration+1}分钟',False,f'结束时刻−开始时刻={duration}分钟。','1小时是60分钟，不是100分钟。')
@@ -273,6 +283,15 @@ def special(c,k,n):
         if k==3:return judge(f'{count}个{shape}各自的'+('棱' if edges==12 else '边')+f'数之和是{edges*count+1}',False,f'每个{shape}有{edges}条，共{edges*count}条。','平面图形的边和立体图形的棱要区分。')
         vals=[edges*count,vertices*count,edges*(count+1),0,vertices*(count+2)];texts=[f'{count}个{shape}各自有几条'+('棱？填写总数。' if edges==12 else '边？填写总数。'),f'{count}个{shape}的顶点数相加是多少？',f'{count+1}个{shape}模型各自的'+('棱' if edges==12 else '边')+'数相加是多少？','',f'用小珠子表示{shape}的顶点，做{count+2}个模型需要几颗珠子？']
         return q(texts[k],vals[k],str(vals[k]),f'{shape}有{edges}条'+('棱' if edges==12 else '边')+f'、{vertices}个顶点。',f'根据模型数量计算，得{vals[k]}。','数顶点时不要重复数同一个点。',['图形特征','顶点识别','模型计数','','生活应用'][k])
+    if mode=='early-position':
+        front=1+n%7;back=1+(n*3)%7
+        if k==3:return judge(f'按从左到右编号，从第{front}位向右移动1个位置后，仍在第{front}位。',False,f'向右移动，编号增加1，应在第{front+1}位。','先明确编号顺序，再判断移动方向。')
+        rows=[(f'按从左到右编号，小林站在第{front}位，向右移动2个位置后在第几位？',front+2,f'{front}+2','左右位置'),
+              (f'队伍从前到后编号，小林排第{front+1}，他前面有几人？',front,f'{front+1}-1','前后位置'),
+              (f'按从左到右编号，棋子在第{front+1}格，向左移动1格后在第几格？',front,f'{front+1}-1','反向移动'),
+              None,(f'小林前面有{front}人，后面有{back}人，加上小林自己，队伍一共几人？',front+back+1,f'{front}+{back}+1','位置应用')]
+        text,value,expr,kind=rows[k]
+        return q(text,value,expr,'从左到右、从前到后依次编号；数总人数时要包括自己。',f'{expr.replace("+","＋").replace("-","−")}＝{value}。','不要漏掉自己，也不要颠倒编号方向。',kind,seconds=45)
     if mode in ('direction','position'):
         row=a;col=b
         if k==3:
@@ -443,7 +462,7 @@ def concept(c,k,n):
     options=None
     if kind in ('判断辨析','性质判断','奇偶判断','正反比例辨析','等值判断'):
         options=['错误','正确'] if '正确' in text else ['不变','改变'] if '改变' in text else ['不等','相等'] if '相等' in text else ['不是','是']
-    return q(text,value,expr,method,f'依据题目条件计算或判断，答案为{fmt(value)}。',mistake,kind,seconds=90,options=options)
+    return q(text,value,expr,method,f'按题意代入：{expr.replace("**","的").replace("*","×").replace("/","÷")}＝{fmt(value)}。' if kind not in ('判断辨析','性质判断','奇偶判断','正反比例辨析','等值判断') else method,mistake,kind,seconds=90,options=options)
 
 
 SPECS=[]
@@ -454,13 +473,13 @@ def add(g,s,unit,name,family,**config):
 # Curriculum organization follows the commonly used PEP primary sequence and
 # the selected video-course subjects; it is not a claim of a 2026 edition audit.
 add(1,0,'准备与认识数','1～5的认识与组成','numbers',limit=5)
-add(1,0,'位置','前后左右与位置','special',mode='position')
-add(1,0,'10以内的数与运算','6～10的认识与比较','numbers',limit=10)
+add(1,0,'位置','前后左右与位置','special',mode='early-position')
+add(1,0,'10以内的数与运算','6～10的认识与比较','numbers',limit=10,minimum=6)
 add(1,0,'10以内的数与运算','10以内的加法','arithmetic',op='+',limit=10)
 add(1,0,'10以内的数与运算','10以内的减法','arithmetic',op='-',limit=10)
 add(1,0,'认识图形','平面图形的边与顶点','special',mode='shapes',shape=('三角形',3,3))
 add(1,0,'11～20各数的认识','十与一及数的组成','numbers',limit=20,place=10)
-add(1,0,'认识钟表','整时与分钟的初步认识','special',mode='clock')
+add(1,0,'认识钟表','整时的认识','special',mode='whole-clock')
 add(1,0,'20以内的加法','20以内进位加法','arithmetic',op='+',limit=20,carry=True)
 add(1,1,'认识图形','长方形与正方形的特征','special',mode='shapes',shape=('长方形',4,4))
 add(1,1,'20以内的减法','20以内退位减法','arithmetic',op='-',limit=20,borrow=True)
@@ -658,8 +677,8 @@ def main():
             '', '|册次|单元|知识点|题型|练习 / 相似题|','|---|---|---|---|---|']
     for t in topics:
         report.append(f'|{t["Grade"]}{"上" if t["Semester"]==0 else "下"}|{t["UnitName"]}|{t["Name"]}|'+ '、'.join(dict.fromkeys(q['QuestionType'] for q in t['Questions']))+f'|{len(t["Questions"])} / {len(t["ReviewQuestions"])}|')
-    report+=['','## 尚需补充的独立题型','','- 真实图形交互：量角、画图、轴对称、旋转、观察物体视图、钟面指针、统计图及扇形图。当前以明确的文字条件和数字作答为主。',
-             '- 部分主题需进一步细分：分类的实际操作、扇形统计图、圆环面积、正反比例图像、具体角度和距离确定方向、综合实践。当前标题不能替代这些内容的完整验收。',
+    report+=['','## 尚需补充的独立题型','','- 图形互动补充题库由 `VisualExercises.cs` 提供，覆盖12个知识点，题数和类型见 `docs/question-bank-audit.md`；此表只统计JSON主库。',
+             '- 观察物体目前是单排积木的正面视图；复杂遮挡、多排三视图、开放绘图与综合实践仍需后续独立审核。',
              '- 每道题的时限为初始建议，需要儿童实际体验后校准；不宣称已经由教师逐题审校。',
              '- 全部标准答案使用精确分数验算；判断题检查陈述，图形题检查单位。自动验算不等于题干、教学顺序和情境均已完成教学审核。',
              '- 外部题库（包括GSM8K）本批未导入，避免未经审核的机器翻译和混合授权。','']

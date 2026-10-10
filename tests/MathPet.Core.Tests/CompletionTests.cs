@@ -7,7 +7,7 @@ public sealed class CompletionTests
  {
   var state=new PlayerState();var engine=new GameEngine(state);var quiz=engine.Start(StudyMode.Practice,1,topicId:"addition");
   engine.SelectPet("rabbit");engine.Feed();var rabbit=state.ActivePet.Experience;
-  while(!quiz.Completed){quiz.Submit(quiz.Current.Answer);quiz.Next();}var result=quiz.Finish();
+  while(!quiz.Completed){quiz.Submit(TestAnswers.For(quiz.Current));quiz.Next();}var result=quiz.Finish();
   Assert.Equal("cat",quiz.RewardSpecies);Assert.Equal(rabbit,state.ActivePet.Experience);Assert.Equal(20+result.GrowthGained,state.Pets[0].Experience);Assert.Equal(65,state.Pets[0].Fullness);Assert.Equal(85,state.ActivePet.Fullness);
  }
  [Fact] public void WardrobeHasOwnershipSlotAndIndependentPetChecks()
@@ -31,14 +31,14 @@ public sealed class CompletionTests
  {
   var state=new PlayerState();var engine=new GameEngine(state);var unit=Curriculum.ForSemester(1,Semester.First).First(t=>t.Order<1000).UnitName;
   foreach(var quiz in new[]{engine.StartComprehensive(1,Semester.First,unit),engine.StartComprehensive(1,Semester.First)}){
-   Assert.InRange(quiz.Questions.Count,3,12);Assert.True(quiz.IsChallenge);while(!quiz.Completed){quiz.Submit(quiz.Current.Answer);quiz.Next();}Assert.True(quiz.Finish().Passed);
+   Assert.InRange(quiz.Questions.Count,3,12);Assert.True(quiz.IsChallenge);while(!quiz.Completed){quiz.Submit(TestAnswers.For(quiz.Current));quiz.Next();}Assert.True(quiz.Finish().Passed);
   }
   Assert.Equal(2,state.Stars.Count);Assert.All(state.Stars.Keys,k=>Assert.StartsWith("comprehensive:",k));
  }
  [Fact] public void EveryVisualExerciseAndReviewHasConsistentAnswerAndDistinctParameters()
  {
   foreach(var topic in VisualExercises.Create())for(var i=0;i<topic.Questions.Count;i++){
-   var q=topic.Questions[i];var review=topic.ReviewQuestions[i];Assert.NotEmpty(q.Diagram);Assert.NotEqual(string.Join(",",q.Diagram),string.Join(",",review.Diagram));Assert.True(AnswerChecker.IsCorrect(q,q.Answer));Assert.False(AnswerChecker.IsCorrect(q,"-999"));Assert.True(q.Solution.Length>=3);
+   var q=topic.Questions[i];var review=topic.ReviewQuestions[i];Assert.NotEmpty(q.Diagram);Assert.NotEqual(string.Join(",",q.Diagram),string.Join(",",review.Diagram));Assert.True(AnswerChecker.IsCorrect(q,TestAnswers.For(q)));Assert.False(AnswerChecker.IsCorrect(q,"-999"));Assert.True(q.Solution.Length>=3);
   }
   var reflection=VisualExercises.Create().Single(t=>t.Id=="visual-reflect").Questions[0];Assert.True(AnswerChecker.IsCorrect(reflection,"(6,2)"));Assert.False(AnswerChecker.IsCorrect(reflection,"(6,3)"));
   var clock=VisualExercises.Create().Single(t=>t.Id=="visual-clock").Questions[0];Assert.True(AnswerChecker.IsCorrect(clock,"3:30"));Assert.False(AnswerChecker.IsCorrect(clock,"3:75"));

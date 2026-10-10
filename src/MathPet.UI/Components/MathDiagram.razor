@@ -12,19 +12,21 @@
     <path d="M45 195 A115 115 0 0 1 275 195 Z" fill="#eee6f9" stroke="#b3a0cd" />
     @for(var n=0;n<=180;n+=10){var a=n*Math.PI/180;var x=160+105*Math.Cos(a);var y=195-105*Math.Sin(a);<g><text x="@x" y="@y" text-anchor="middle" font-size="9">@n</text></g>}
     <line x1="160" y1="195" x2="275" y2="195" stroke="#9e7190" stroke-width="3" />
-    <line x1="160" y1="195" x2="@(160+110*Math.Cos((ReadOnly||D.Length==1?D[0]:value)*Math.PI/180))" y2="@(195-110*Math.Sin((ReadOnly||D.Length==1?D[0]:value)*Math.PI/180))" stroke="#9e7190" stroke-width="3" />
+    <line x1="160" y1="195" x2="@(160+110*Math.Cos((ReadOnly||IsReading||D.Length==1?D[0]:value)*Math.PI/180))" y2="@(195-110*Math.Sin((ReadOnly||IsReading||D.Length==1?D[0]:value)*Math.PI/180))" stroke="#9e7190" stroke-width="3" />
     <line x1="160" y1="195" x2="@(160+95*Math.Cos(value*Math.PI/180))" y2="@(195-95*Math.Sin(value*Math.PI/180))" stroke="#68a889" stroke-width="2" stroke-dasharray="4 3" />
     break;
  case "reflect":
     @for(var x=0;x<=7;x++){<line x1="@(48+x*32)" y1="32" x2="@(48+x*32)" y2="192" stroke="#ded4eb" />}
     @for(var y=0;y<=5;y++){<line x1="48" y1="@(32+y*32)" x2="272" y2="@(32+y*32)" stroke="#ded4eb" />}
+    @for(var x=0;x<=7;x++){<g><text x="@(48+x*32)" y="225" text-anchor="middle">@x</text></g>}
+    @for(var y=0;y<=5;y++){<g><text x="30" y="@(37+y*32)" text-anchor="middle">@y</text></g>}
     <line x1="160" y1="20" x2="160" y2="208" stroke="#9171c5" stroke-dasharray="5 4" />
     <circle cx="@(48+D[0]*32)" cy="@(32+D[1]*32)" r="7" fill="#dc8e9e" />
     @for(var x=0;x<=7;x++){@for(var y=0;y<=5;y++){var px=x;var py=y;<circle class="grid-point" cx="@(48+x*32)" cy="@(32+y*32)" r="9" fill="@(selected==x*10+y?"#65a98c":"transparent")" @onclick="()=>Select(px*10+py)" />}}
     break;
  case "rotate":
     <circle cx="160" cy="120" r="80" fill="none" stroke="#d6c8e5" stroke-dasharray="4 4" />
-    <path d="M160 120 L220 120 L220 90 L190 90 L190 60 L160 60 Z" fill="#d0e8de" stroke="#67a286" transform="rotate(@value 160 120)" />
+    <path d="M160 120 L220 120 L220 90 L190 90 L190 60 L160 60 Z" fill="#d0e8de" stroke="#67a286" transform="rotate(@(value+(D.Length>1?D[1]:0)) 160 120)" />
     <circle cx="160" cy="120" r="5" fill="#9a79bc" />
     break;
  case "views" when !frontView && !ReadOnly:
@@ -47,7 +49,7 @@
     break;
  case "proportion":
     <path d="M55 30 V195 H285" fill="none" stroke="#8b769e" />
-    <path d="@(ProportionPath(D))" fill="none" stroke="#8e72bd" stroke-width="4" /><g><text x="35" y="210">0</text></g>
+    <path d="@(ProportionPath(D))" fill="none" stroke="#8e72bd" stroke-width="4" /><g><text x="35" y="210">0</text><text x="290" y="200">x</text><text x="40" y="25">y</text></g>
     break;
  case "direction":
     <path d="M160 30 V205 M65 120 H255" stroke="#baa8ce" /><g><text x="155" y="22">北</text></g><g><text x="263" y="125">东</text></g>
@@ -61,16 +63,16 @@
     }
     break;
  case "practice":
-    <rect x="65" y="50" width="200" height="140" fill="#d5ead4" stroke="#7ea481" stroke-width="4" stroke-dasharray="8 4" /><g><text x="135" y="40">长 @D[0] m</text></g><g><text x="15" y="130">宽 @D[1] m</text></g><g><text x="90" y="220">沿边框围绳子</text></g>
+    <rect x="65" y="50" width="200" height="140" fill="#d5ead4" stroke="#7ea481" stroke-width="4" stroke-dasharray="8 4" /><g><text x="135" y="40">长 @D[0] m</text></g><g><text x="15" y="130">宽 @(Question.DiagramTask=="read-3"?"？":D[1].ToString()) m</text></g><g><text x="90" y="220">沿边框围绳子</text></g>
     break;
 }
 </svg>
 @if(!ReadOnly){
  @if(Question.Interaction=="views"){<button type="button" class="btn secondary" @onclick="()=>frontView=!frontView">@(frontView?"看立体积木":"看正面视图")</button>}
- @if(Question.Interaction=="clock") {<label>时针 <input type="range" min="1" max="12" value="@hour" @oninput="SetHour" /></label><label>分钟 <input type="range" min="0" max="55" step="5" value="@minute" @oninput="SetMinute" /></label><span>@hour:@minute.ToString("00")</span>}
- @if(Question.Interaction is "angle" or "rotate") {<label>@(Question.Interaction=="angle"?"对齐测量线":"顺时针旋转") <input type="range" min="0" max="@(Question.Interaction=="angle"?180:270)" step="@(Question.Interaction=="angle"?1:90)" value="@value" @oninput="SetValue" /></label><span>@value°</span>}
- @if(Question.Interaction=="reflect"){<p>点击轴另一侧的网格交点。也可用按钮选择，横坐标0～7、纵坐标0～5。</p><div class="flex">@for(var x=4;x<=7;x++){@for(var y=0;y<=5;y++){var code=x*10+y;<button class="btn secondary" type="button" @onclick="()=>Select(code)">(@x,@y)</button>}}</div>}
- @if(Question.Interaction=="classify"){<div class="flex">@for(var i=0;i<D.Length;i++){var n=i;<button type="button" class="btn secondary" aria-pressed="@chosen.Contains(i)" @onclick="()=>Toggle(n)">@(i+1)号图形</button>}</div>}
+ @if(Question.Interaction=="clock" && !IsReading) {<label>时针 <input type="range" min="1" max="12" value="@hour" @oninput="SetHour" /></label><label>分钟 <input type="range" min="0" max="55" step="5" value="@minute" @oninput="SetMinute" /></label><span>@hour:@minute.ToString("00")</span>}
+ @if(!IsReading && Question.Interaction is "angle" or "rotate") {<label>@(Question.Interaction=="angle"?"对齐测量线":"顺时针旋转") <input type="range" min="0" max="@(Question.Interaction=="angle"?180:270)" step="@(Question.Interaction=="angle"?1:90)" value="@value" @oninput="SetValue" /></label><span>@value°</span>}
+ @if(Question.Interaction=="reflect" && !IsReading){<p>点击轴另一侧的网格交点。也可用按钮选择，横坐标0～7、纵坐标0～5。</p><div class="flex">@for(var x=4;x<=7;x++){@for(var y=0;y<=5;y++){var code=x*10+y;<button class="btn secondary" type="button" @onclick="()=>Select(code)">(@x,@y)</button>}}</div>}
+ @if(Question.Interaction=="classify" && (!IsReading || Question.DiagramTask=="rectangles")){<div class="flex">@for(var i=0;i<D.Length;i++){var n=i;<button type="button" class="btn secondary" aria-pressed="@chosen.Contains(i)" @onclick="()=>Toggle(n)">@(i+1)号图形</button>}</div>}
 }
 </div>
 @code {
@@ -78,16 +80,17 @@
  [Parameter]public bool ReadOnly{get;set;}
  [Parameter]public EventCallback<string> AnswerChanged{get;set;}
  private int[] D=>Question.Diagram;
+ private bool IsReading=>Question.DiagramTask.StartsWith("read-");
  private int hour=12,minute,value,selected=-1;
  private bool frontView;
  private string? lastId;
  private readonly HashSet<int> chosen=[];
- protected override void OnParametersSet(){if(lastId==Question.Id)return;lastId=Question.Id;hour=ReadOnly&&Question.Interaction=="clock"?D[0]:12;minute=ReadOnly&&Question.Interaction=="clock"?D[1]:0;value=0;selected=-1;chosen.Clear();}
+ protected override void OnParametersSet(){if(lastId==Question.Id)return;lastId=Question.Id;hour=(ReadOnly||IsReading)&&Question.Interaction=="clock"?D[0]:12;minute=(ReadOnly||IsReading)&&Question.Interaction=="clock"?D[1]:0;value=0;selected=-1;chosen.Clear();}
  private async Task SetHour(ChangeEventArgs e){hour=int.Parse(e.Value!.ToString()!);await AnswerChanged.InvokeAsync($"{hour}:{minute:00}");}
  private async Task SetMinute(ChangeEventArgs e){minute=int.Parse(e.Value!.ToString()!);await AnswerChanged.InvokeAsync($"{hour}:{minute:00}");}
  private async Task SetValue(ChangeEventArgs e){value=int.Parse(e.Value!.ToString()!);await AnswerChanged.InvokeAsync(value.ToString());}
- private async Task Select(int code){if(ReadOnly)return;selected=code;await AnswerChanged.InvokeAsync($"({code/10},{code%10})");}
- private async Task Toggle(int n){if(ReadOnly)return;if(!chosen.Add(n))chosen.Remove(n);await AnswerChanged.InvokeAsync("选中："+string.Join("、",chosen.Order().Select(i=>i+1)));}
- private static string ProportionPath(int[] d)=> d[0]==1?$"M55 195 L260 {195-30*d[1]}":string.Join(" ",Enumerable.Range(1,41).Select(i=>FormattableString.Invariant($"{(i==1?"M":"L")}{55+5.5*i} {195-150.0/i}")));
+ private async Task Select(int code){if(ReadOnly||IsReading)return;selected=code;await AnswerChanged.InvokeAsync($"({code/10},{code%10})");}
+ private async Task Toggle(int n){if(ReadOnly||IsReading)return;if(!chosen.Add(n))chosen.Remove(n);await AnswerChanged.InvokeAsync("选中："+string.Join("、",chosen.Order().Select(i=>i+1)));}
+ private static string ProportionPath(int[] d)=> string.Join(" ",Enumerable.Range(0,41).Select(i=>{var x=d[0]==1?i/20.0:0.5+i/10.0;var y=d[0]==1?d[1]*x:d[1]/x;return FormattableString.Invariant($"{(i==0?"M":"L")}{55+50*x} {195-12*y}");}));
  private static string PiePath(int percent){var a=percent*Math.PI/50;var x=160+85*Math.Sin(a);var y=110-85*Math.Cos(a);return FormattableString.Invariant($"M160 110 L160 25 A85 85 0 {(percent>50?1:0)} 1 {x} {y} Z");}
 }

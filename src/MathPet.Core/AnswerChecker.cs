@@ -9,19 +9,20 @@ public static partial class AnswerChecker
     public static bool IsCorrect(Question question, string input)
     {
         var text = Normalize(input);
-        if(question.Interaction=="classify" && text.StartsWith("选中："))
+        if(question.Interaction=="classify" && !question.DiagramTask.StartsWith("read-"))
         {
+            if(!text.StartsWith("选中:"))return false;
             var selected=text[3..].Split('、',StringSplitOptions.RemoveEmptyEntries);
             if(selected.Any(x=>!int.TryParse(x,out _)))return false;
-            return selected.Select(int.Parse).Order().SequenceEqual(question.Diagram.Select((x,i)=>(x,i)).Where(p=>p.x==3).Select(p=>p.i+1));
+            return selected.Select(int.Parse).Order().SequenceEqual(question.Diagram.Select((x,i)=>(x,i)).Where(p=>p.x==(question.DiagramTask=="rectangles"?4:3)).Select(p=>p.i+1));
         }
-        if(question.Interaction=="reflect" && (text.Contains(',')||text.Contains('，')))
+        if(question.Interaction=="reflect" && question.DiagramTask=="" && (text.Contains(',')||text.Contains('，')))
         {
             var coordinates=text.Trim('(',')','（','）').Replace('，',',').Split(',');
             if(coordinates.Length!=2||!int.TryParse(coordinates[0],out var x)||!int.TryParse(coordinates[1],out var y)||x is <0 or >7||y is <0 or >5)return false;
             text=(x*10+y).ToString(CultureInfo.InvariantCulture);
         }
-        if(question.Interaction=="clock" && text.Contains(':'))
+        if(question.Interaction=="clock" && question.DiagramTask=="" && text.Contains(':'))
         {
             var parts=text.Split(':');
             if(parts.Length!=2||!int.TryParse(parts[0],out var hour)||!int.TryParse(parts[1],out var minute)||hour is <1 or >12||minute is <0 or >59)return false;
@@ -29,6 +30,10 @@ public static partial class AnswerChecker
         }
         if (question.Unit is { } unit && text.EndsWith(unit, StringComparison.Ordinal))
             text = text[..^unit.Length];
+        if(question.Text.Contains("最简分数"))
+        {
+            if(!TryRational(text,out var n,out var d)||text.Contains('.')||BigInteger.GreatestCommonDivisor(BigInteger.Abs(n),d)!=1)return false;
+        }
         return TryRational(text, out var numerator, out var denominator)
             && TryRational(question.Answer, out var expectedNumerator, out var expectedDenominator)
             && numerator * expectedDenominator == expectedNumerator * denominator;
@@ -39,7 +44,7 @@ public static partial class AnswerChecker
         return string.Concat(input.Trim().Select(c => c switch
         {
             >= '０' and <= '９' => (char)(c - '０' + '0'),
-            '．' => '.', '／' => '/', '−' or '－' => '-', '＋' => '+',
+            '：' => ':', '．' => '.', '／' => '/', '−' or '－' => '-', '＋' => '+',
             _ => c
         }).Where(c => !char.IsWhiteSpace(c)));
     }

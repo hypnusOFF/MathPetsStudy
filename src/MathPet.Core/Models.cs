@@ -16,6 +16,8 @@ public sealed record Question(string Id, int Grade, string TopicId, string Text,
     public string Source { get; init; } = "独立原创";
     public string? Interaction { get; init; }
     public int[] Diagram { get; init; } = [];
+    // Empty keeps the original manipulation controls; other tasks read the same diagram.
+    public string DiagramTask { get; init; } = "";
 }
 public sealed record Topic(string Id, int Grade, string Name, string Area, string Goal,
     string Explanation, string Visual, string[] ExampleSteps, IReadOnlyList<Question> Questions,

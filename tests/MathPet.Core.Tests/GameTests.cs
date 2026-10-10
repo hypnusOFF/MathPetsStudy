@@ -15,7 +15,7 @@ public sealed class GameTests
         while(!session.Completed)
         {
             if(hints)session.RevealHint();
-            session.Submit(session.Current.Answer);
+            session.Submit(TestAnswers.For(session.Current));
             session.Next();
         }
         return session.Finish();
@@ -36,7 +36,7 @@ public sealed class GameTests
     {
         var qs=Curriculum.Topics.Where(t=>t.Order==1000).SelectMany(t=>t.Questions.Concat(t.ReviewQuestions)).ToList();
         Assert.Equal(36,qs.Count);Assert.Equal(36,qs.Select(q=>q.Id).Distinct().Count());
-        foreach(var q in qs){Assert.True(AnswerChecker.IsCorrect(q,q.Answer));Assert.True(q.TimeLimitSeconds>0);Assert.NotEmpty(q.Solution);Assert.NotEmpty(q.Hints);Assert.NotEmpty(q.CommonMistake);}
+        foreach(var q in qs){Assert.True(AnswerChecker.IsCorrect(q,TestAnswers.For(q)));Assert.True(q.TimeLimitSeconds>0);Assert.NotEmpty(q.Solution);Assert.NotEmpty(q.Hints);Assert.NotEmpty(q.CommonMistake);}
     }
     [Fact] public void HigherGradesGetMorePointsForSameDifficulty()
     {

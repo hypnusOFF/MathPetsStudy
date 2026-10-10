@@ -42,7 +42,7 @@ public sealed class QuestionBankTests
         Assert.Equal(questions.Length, questions.Select(q => q.Id).Distinct().Count());
         foreach (var q in questions)
         {
-            Assert.True(AnswerChecker.IsCorrect(q, q.Answer), q.Id);
+            Assert.True(AnswerChecker.IsCorrect(q, TestAnswers.For(q)), q.Id);
             Assert.InRange(q.TimeLimitSeconds, 30, 120);
             Assert.NotEmpty(q.CommonMistake); Assert.True(q.Hints.Length >= 2);
             Assert.NotEmpty(q.Solution); Assert.Equal(q.Grade, Curriculum.FindTopic(q.TopicId).Grade);
@@ -104,7 +104,7 @@ public sealed class QuestionBankTests
         Assert.NotNull(StateSerialization.Deserialize(StateSerialization.Serialize(engine.State)));
         var failed = engine.Start(StudyMode.Challenge, 1, topicId: topic.Id);
         for (var i = 0; i < failed.Questions.Count; i++)
-        { if (i >= 3) failed.RevealHint(); failed.Submit(failed.Current.Answer); failed.Next(); }
+        { if (i >= 3) failed.RevealHint(); failed.Submit(TestAnswers.For(failed.Current)); failed.Next(); }
         Assert.False(failed.Finish().Passed);
     }
 
@@ -130,12 +130,12 @@ public sealed class QuestionBankTests
     {
         var questions = Curriculum.Topics.SelectMany(t => t.Questions.Concat(t.ReviewQuestions));
         foreach (var group in questions.GroupBy(q => (q.Text, Diagram:string.Join(",",q.Diagram))))
-            Assert.All(group, q => Assert.True(AnswerChecker.IsCorrect(group.First(), q.Answer), q.Text));
+            Assert.All(group, q => Assert.True(AnswerChecker.IsCorrect(group.First(), TestAnswers.For(q)), q.Text));
     }
 
     private static SessionSummary Complete(QuizSession quiz)
     {
-        while (!quiz.Completed) { quiz.Submit(quiz.Current.Answer); quiz.Next(); }
+        while (!quiz.Completed) { quiz.Submit(TestAnswers.For(quiz.Current)); quiz.Next(); }
         return quiz.Finish();
     }
 }

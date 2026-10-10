@@ -50,6 +50,23 @@ public static class StateSerialization
             || state.Mistakes.Any(m=>m is null || m.WrongCount < 0 || string.IsNullOrWhiteSpace(m.QuestionId)))
             throw new InvalidDataException("学习记录不合法。");
         if (string.IsNullOrWhiteSpace(state.PetName) || state.PetName.Length > 12) throw new InvalidDataException("宠物名字不合法。");
+        // A content correction may retire a deduplicated parameter variant.
+        // Keep its mistake reviewable using the same topic and template.
+        foreach(var mistake in state.Mistakes.Where(m=>Curriculum.FindQuestion(m.QuestionId) is null))
+        {
+            var separator=mistake.QuestionId.LastIndexOf('-');
+            if(separator<0)continue;
+            var topicId=mistake.QuestionId[..separator];var suffix=mistake.QuestionId[(separator+1)..];
+            var topic=Curriculum.Topics.FirstOrDefault(t=>t.Id==topicId&&t.Order<1000);
+            if(topic is null||suffix.Length<2||suffix[0] is not ('q' or 'r')||!int.TryParse(suffix[1..],out var index)||index is <1 or >40)continue;
+            var template=$"{topicId}-t{(index-1)%5+1}";
+            var replacement=(suffix[0]=='q'?topic.Questions:topic.ReviewQuestions).FirstOrDefault(q=>q.TemplateId==template);
+            if(replacement is not null)mistake.QuestionId=replacement.Id;
+        }
+        state.Mistakes=state.Mistakes.GroupBy(m=>m.QuestionId).Select(g=>new Mistake {
+            QuestionId=g.Key,LastAnswer=g.OrderByDescending(m=>m.LastAttempt).First().LastAnswer,
+            LastAttempt=g.Max(m=>m.LastAttempt),WrongCount=(int)Math.Min(int.MaxValue,g.Sum(m=>(long)m.WrongCount))
+        }).ToList();
         return state;
     }
 }
