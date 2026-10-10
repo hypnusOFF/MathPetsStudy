@@ -23,7 +23,28 @@ const assert=require('node:assert/strict');
   assert(await image.evaluate(n=>n.isConnected),'Cancelling another action must retain the image');
   await page.waitForFunction(()=>document.querySelector('.pet-motion').dataset.action==='idle');
   assert(await image.evaluate(n=>n.isConnected),'Returning to idle must retain the image');
+  for(const reduced of [false,true]){
+   await page.evaluate(reduced=>{
+    const s=JSON.parse(localStorage.getItem('math-pet-csharp-v1'));
+    s.ReducedMotion=reduced;s.Food=5;s.Pets.forEach(p=>p.Fullness=0);
+    localStorage.setItem('math-pet-csharp-v1',JSON.stringify(s));
+   },reduced);
+   await page.reload();await page.getByRole('heading',{name:'今天，也进步一点点'}).waitFor();
+   await page.getByRole('navigation').getByRole('button',{name:/宠物家园$/}).click();
+   const effects=()=>page.locator('.pet-motion').first().locator('.pet-effect').evaluateAll(nodes=>nodes.map(n=>n.className));
+   await page.getByTestId('feed').click();
+   await page.waitForFunction(()=>document.querySelector('.pet-motion').dataset.action==='feed');
+   assert.deepEqual(await effects(),['pet-effect pet-food'],`feed props, reduced=${reduced}`);
+   await page.getByRole('button',{name:'🧶 玩耍',exact:true}).click();
+   await page.waitForFunction(()=>document.querySelector('.pet-motion').dataset.action==='play');
+   assert.deepEqual(await effects(),['pet-effect pet-toy'],`play props, reduced=${reduced}`);
+   await page.getByRole('button',{name:'✨ 清洁 / 抚摸',exact:true}).click();
+   await page.waitForFunction(()=>document.querySelector('.pet-motion').dataset.action==='pet');
+   assert.deepEqual(await effects(),[],`petting props, reduced=${reduced}`);
+   await page.waitForFunction(()=>document.querySelector('.pet-motion').dataset.action==='idle');
+   assert.deepEqual(await effects(),[],`idle props, reduced=${reduced}`);
+  }
   assert.deepEqual(errors,[]);
-  console.log('PASS: mobile pet image survives action start, cancellation and completion; no cutout masks or fragment holes.');
+  console.log('PASS: stable mobile pet images; feed only apple, play only ball, petting/idle no effects, in full and reduced motion.');
  }finally{await browser.close();}
 })().catch(e=>{console.error(e);process.exitCode=1;});

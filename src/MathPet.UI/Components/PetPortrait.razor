@@ -12,11 +12,11 @@
         {
             <img class="pet-sprite pet-old sprite-@(Species)-@(previousStage)" src="@Sprite(previousStage)" alt="" aria-hidden="true" draggable="false" />
         }
-        <span class="pet-ring" aria-hidden="true"></span>
-        <span class="pet-effect pet-heart" aria-hidden="true">♥</span>
-        <span class="pet-effect pet-star" aria-hidden="true">✦</span>
-        <img class="pet-effect pet-food" src="_content/MathPet.UI/pet-assets/items/apple.svg" alt="" aria-hidden="true" />
-        <img class="pet-effect pet-toy" src="_content/MathPet.UI/pet-assets/items/ball.svg" alt="" aria-hidden="true" />
+        @if(action is "upgrade" or "evolve"){<span class="pet-ring" aria-hidden="true"></span>}
+        @if(action=="encourage"){<span class="pet-effect pet-heart" aria-hidden="true">♥</span>}
+        @if(action is "correct" or "upgrade" or "evolve"){<span class="pet-effect pet-star" aria-hidden="true">✦</span>}
+        @if(action=="feed"){<img class="pet-effect pet-food" src="_content/MathPet.UI/pet-assets/items/apple.svg" alt="" aria-hidden="true" />}
+        @if(action=="play"){<img class="pet-effect pet-toy" src="_content/MathPet.UI/pet-assets/items/ball.svg" alt="" aria-hidden="true" />}
     </div>
 </div>
 @code {
