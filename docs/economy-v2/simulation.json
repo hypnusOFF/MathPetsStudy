@@ -1,0 +1,282 @@
+{
+  "proposal": true,
+  "multipliers": [
+    1,
+    1.15,
+    1.3,
+    1.5,
+    1.75,
+    2
+  ],
+  "levels": [
+    {
+      "level": 1,
+      "cumulativeExperience": 0,
+      "nextLevelExperience": 42
+    },
+    {
+      "level": 2,
+      "cumulativeExperience": 42,
+      "nextLevelExperience": 53
+    },
+    {
+      "level": 3,
+      "cumulativeExperience": 95,
+      "nextLevelExperience": 68
+    },
+    {
+      "level": 4,
+      "cumulativeExperience": 163,
+      "nextLevelExperience": 87
+    },
+    {
+      "level": 5,
+      "cumulativeExperience": 250,
+      "nextLevelExperience": 110
+    },
+    {
+      "level": 6,
+      "cumulativeExperience": 360,
+      "nextLevelExperience": 137
+    },
+    {
+      "level": 7,
+      "cumulativeExperience": 497,
+      "nextLevelExperience": 168
+    },
+    {
+      "level": 8,
+      "cumulativeExperience": 665,
+      "nextLevelExperience": 203
+    },
+    {
+      "level": 9,
+      "cumulativeExperience": 868,
+      "nextLevelExperience": 242
+    },
+    {
+      "level": 10,
+      "cumulativeExperience": 1110,
+      "nextLevelExperience": 285
+    },
+    {
+      "level": 11,
+      "cumulativeExperience": 1395,
+      "nextLevelExperience": 332
+    },
+    {
+      "level": 12,
+      "cumulativeExperience": 1727,
+      "nextLevelExperience": 383
+    },
+    {
+      "level": 13,
+      "cumulativeExperience": 2110,
+      "nextLevelExperience": 438
+    },
+    {
+      "level": 14,
+      "cumulativeExperience": 2548,
+      "nextLevelExperience": 497
+    },
+    {
+      "level": 15,
+      "cumulativeExperience": 3045,
+      "nextLevelExperience": 560
+    },
+    {
+      "level": 16,
+      "cumulativeExperience": 3605,
+      "nextLevelExperience": 627
+    },
+    {
+      "level": 17,
+      "cumulativeExperience": 4232,
+      "nextLevelExperience": 698
+    },
+    {
+      "level": 18,
+      "cumulativeExperience": 4930,
+      "nextLevelExperience": 773
+    },
+    {
+      "level": 19,
+      "cumulativeExperience": 5703,
+      "nextLevelExperience": 852
+    },
+    {
+      "level": 20,
+      "cumulativeExperience": 6555,
+      "nextLevelExperience": null
+    }
+  ],
+  "curriculum": [
+    {
+      "grade": 1,
+      "oldIncome": 3315,
+      "proposedIncome": 3315,
+      "practice": 1035,
+      "challenge": 1601,
+      "comprehensive": 679
+    },
+    {
+      "grade": 2,
+      "oldIncome": 4554,
+      "proposedIncome": 4117,
+      "practice": 1316,
+      "challenge": 1989,
+      "comprehensive": 812
+    },
+    {
+      "grade": 3,
+      "oldIncome": 6945,
+      "proposedIncome": 5684,
+      "practice": 1824,
+      "challenge": 2744,
+      "comprehensive": 1116
+    },
+    {
+      "grade": 4,
+      "oldIncome": 7981,
+      "proposedIncome": 6092,
+      "practice": 1919,
+      "challenge": 2870,
+      "comprehensive": 1303
+    },
+    {
+      "grade": 5,
+      "oldIncome": 12597,
+      "proposedIncome": 9066,
+      "practice": 3101,
+      "challenge": 4362,
+      "comprehensive": 1603
+    },
+    {
+      "grade": 6,
+      "oldIncome": 13178,
+      "proposedIncome": 8867,
+      "practice": 2889,
+      "challenge": 4248,
+      "comprehensive": 1730
+    }
+  ],
+  "simulations": [
+    {
+      "grade": 1,
+      "strategy": "learning-only",
+      "firstEvolutionDay": 10,
+      "finalEvolutionDay": 64,
+      "maxLevelDay": 288,
+      "rounds": 288,
+      "earned": 11860,
+      "foodCost": 0,
+      "toyCost": 0,
+      "remainingCoins": 11980,
+      "repeatedQuestions": 1274
+    },
+    {
+      "grade": 1,
+      "strategy": "balanced",
+      "firstEvolutionDay": 7,
+      "finalEvolutionDay": 44,
+      "maxLevelDay": 167,
+      "rounds": 167,
+      "earned": 8306,
+      "foodCost": 6680,
+      "toyCost": 100,
+      "remainingCoins": 1646,
+      "repeatedQuestions": 548
+    },
+    {
+      "grade": 1,
+      "strategy": "growth-focused",
+      "firstEvolutionDay": 10,
+      "finalEvolutionDay": 38,
+      "maxLevelDay": 106,
+      "rounds": 106,
+      "earned": 6328,
+      "foodCost": 4800,
+      "toyCost": 1500,
+      "remainingCoins": 148,
+      "repeatedQuestions": 206
+    },
+    {
+      "grade": 3,
+      "strategy": "learning-only",
+      "firstEvolutionDay": 10,
+      "finalEvolutionDay": 59,
+      "maxLevelDay": 226,
+      "rounds": 226,
+      "earned": 15993,
+      "foodCost": 0,
+      "toyCost": 0,
+      "remainingCoins": 16113,
+      "repeatedQuestions": 530
+    },
+    {
+      "grade": 3,
+      "strategy": "balanced",
+      "firstEvolutionDay": 7,
+      "finalEvolutionDay": 43,
+      "maxLevelDay": 139,
+      "rounds": 139,
+      "earned": 12103,
+      "foodCost": 5560,
+      "toyCost": 100,
+      "remainingCoins": 6563,
+      "repeatedQuestions": 88
+    },
+    {
+      "grade": 3,
+      "strategy": "growth-focused",
+      "firstEvolutionDay": 10,
+      "finalEvolutionDay": 33,
+      "maxLevelDay": 84,
+      "rounds": 84,
+      "earned": 7688,
+      "foodCost": 6240,
+      "toyCost": 1500,
+      "remainingCoins": 68,
+      "repeatedQuestions": 10
+    },
+    {
+      "grade": 6,
+      "strategy": "learning-only",
+      "firstEvolutionDay": 10,
+      "finalEvolutionDay": 59,
+      "maxLevelDay": 238,
+      "rounds": 238,
+      "earned": 23279,
+      "foodCost": 0,
+      "toyCost": 0,
+      "remainingCoins": 23399,
+      "repeatedQuestions": 677
+    },
+    {
+      "grade": 6,
+      "strategy": "balanced",
+      "firstEvolutionDay": 7,
+      "finalEvolutionDay": 43,
+      "maxLevelDay": 144,
+      "rounds": 144,
+      "earned": 17751,
+      "foodCost": 5760,
+      "toyCost": 100,
+      "remainingCoins": 12011,
+      "repeatedQuestions": 165
+    },
+    {
+      "grade": 6,
+      "strategy": "growth-focused",
+      "firstEvolutionDay": 10,
+      "finalEvolutionDay": 27,
+      "maxLevelDay": 69,
+      "rounds": 69,
+      "earned": 9518,
+      "foodCost": 8000,
+      "toyCost": 1500,
+      "remainingCoins": 138,
+      "repeatedQuestions": 7
+    }
+  ]
+}
