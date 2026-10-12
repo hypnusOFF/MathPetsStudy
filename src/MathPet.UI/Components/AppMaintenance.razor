@@ -1,39 +1,34 @@
 @inject IServiceProvider Services
-@inject GameState Game
+@if (update is not null && !ShowSettings)
+{
+<div class="card update-banner" role="status"><b>发现新版本 @update.VersionName</b><p class="muted tiny">前往设置下载更新，安装时无需卸载当前应用。</p><button class="btn secondary" @onclick="() => OnOpenSettings.InvokeAsync()">前往设置更新</button></div>
+}
+@if (ShowSettings)
+{
+<div class="card settings" data-testid="app-maintenance">
+<h3>应用更新</h3>
+<p class="muted tiny">当前版本 @(Platform?.CurrentVersion ?? "0.2.1（网页验证版）")</p>
 @if (Platform is not null)
 {
-<details class="card settings" data-testid="app-maintenance"><summary>应用更新与存档</summary>
-<h3>应用更新与存档</h3>
-<p class="muted tiny">当前版本 @Platform.CurrentVersion · 启动时自动检查，也可手动检查。</p>
+<p class="muted tiny">启动时自动检查更新，也可在这里手动检查。</p>
 <button class="btn secondary" disabled="@busy" @onclick="Check">检查更新</button>
 @if (update is not null)
 {
 <p>新版本 @update.VersionName 可下载。下载完成后点击 APK，按系统提示确认安装。</p>
 <button class="btn" disabled="@busy" @onclick="Download">下载更新 APK</button>
 }
-<p class="muted tiny">同签名更新通常保留进度。卸载前请导出存档，并确认已保存到应用外。</p>
-<button class="btn ghost" disabled="@busy" @onclick="Export">导出存档</button>
-<p class="muted tiny">请在学习首页导入存档。</p>
-<button class="btn ghost" disabled="@(busy || !AllowImport)" @onclick="Pick">导入存档</button>
-@if (pending is not null)
-{
-<p role="alert">导入将替换当前进度，不能合并。建议先导出当前存档。</p>
-<button class="btn" disabled="@(busy || !AllowImport)" @onclick="Import">确认替换进度</button>
-<button class="btn ghost" disabled="@busy" @onclick="() => pending=null">取消</button>
-}
 @if (message is not null){<p role="status">@message</p>}
-</details>
+}
+else{<p class="muted tiny">网页验证版不提供 APK 更新，请在安卓应用中检查更新。</p>}
+</div>
 }
 @code {
-    [Parameter] public bool AllowImport { get; set; }
-    [Parameter] public EventCallback OnImported { get; set; }
+    [Parameter] public bool ShowSettings { get; set; }
+    [Parameter] public EventCallback OnOpenSettings { get; set; }
     private IAppMaintenance? Platform=>Services.GetService(typeof(IAppMaintenance)) as IAppMaintenance;
-    private AppUpdate? update;private string? pending,message;private bool busy;
+    private AppUpdate? update;private string? message;private bool busy;
     protected override async Task OnAfterRenderAsync(bool firstRender){if(firstRender&&Platform is not null){await Check();StateHasChanged();}}
-    private async Task Run(Func<Task> action){if(busy)return;busy=true;try{await action();}catch{message="操作未完成。请检查网络、文件或设备可用空间后重试。";}finally{busy=false;}}
-    private Task Check()=>Run(async()=>{try{update=await Platform!.CheckAsync();message=update is null?"当前已是最新版本。":"发现新版本。";}catch{update=null;message="暂时无法检查更新，可能尚未发布正式版本，或网络不可用。可稍后重试。";}});
+    private async Task Run(Func<Task> action){if(busy)return;busy=true;await InvokeAsync(StateHasChanged);try{await action();}catch{message="操作未完成。请检查网络后重试。";}finally{busy=false;}}
+    private Task Check()=>Run(async()=>{try{update=await Platform!.CheckAsync();message=update is null?"当前已是最新版本。":"发现新版本。";}catch{update=null;message="暂时无法检查更新，请检查网络后重试。";}});
     private Task Download()=>Run(()=>Platform!.OpenDownloadAsync(update!));
-    private Task Export()=>Run(async()=>{if(Game.StorageError is not null)throw new IOException();await Platform!.ExportAsync(StateSerialization.Serialize(Game.Engine.State));message="已打开分享窗口，请保存存档文件到应用外，并确认保存成功。";});
-    private Task Pick()=>Run(async()=>{pending=null;var text=await Platform!.PickBackupAsync();if(text is null)return;var state=StateSerialization.DeserializeBackup(text);pending=StateSerialization.Serialize(state);message=$"存档已验证：{state.PetName}，{state.Coins} 积分。确认后替换当前进度。";});
-    private Task Import()=>Run(async()=>{if(!AllowImport)return;await Platform!.PreserveBeforeImportAsync();await Game.ImportAsync(pending!);pending=null;await OnImported.InvokeAsync();message="存档已导入。";});
 }

@@ -44,3 +44,5 @@ body{overscroll-behavior:none}.content{padding-bottom:35px}.sidebar{padding-top:
 .care-item-art{display:inline-block;aspect-ratio:1;background-image:url('care-assets/items.png');background-size:300% 200%;background-repeat:no-repeat}
 .pet-motion .care-item-art.pet-food,.pet-motion .care-item-art.pet-toy{aspect-ratio:1;height:auto}
 .pet-motion .decor-icon.pet-food,.pet-motion .decor-icon.pet-toy{aspect-ratio:5/7;height:auto}
+
+.daily-goal{margin-top:20px;background:linear-gradient(120deg,#fff,#f1edfdf0)}.daily-goal h3{margin:0}.daily-goal .stat{font-size:24px}.goal-complete{color:var(--green);font-weight:750}.local-save{margin-top:18px}.update-banner{margin-bottom:20px;background:#f1edfdf0}.settings .btn{margin:8px 8px 0 0}

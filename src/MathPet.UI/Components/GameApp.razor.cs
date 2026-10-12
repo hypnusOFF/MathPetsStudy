@@ -6,10 +6,10 @@ namespace MathPet.UI.Components;
 
 public partial class GameApp
 {
-    private enum View { Home,Courses,Lesson,Daily,Map,Review,Quiz,Result,Pet,Shop,Bag,Growth }
+    private enum View { Home,Courses,Lesson,Daily,Map,Review,Quiz,Result,Pet,Shop,Bag,Growth,Settings }
     private static readonly (View Page,string Icon,string Label)[] Navigation =
     [(View.Home,"⌂","学习首页"),(View.Courses,"▤","学习课堂"),(View.Daily,"✎","每日练习"),
-     (View.Map,"⚑","闯关地图"),(View.Review,"↺","错题复习"),(View.Pet,"♡","宠物家园")];
+     (View.Map,"⚑","闯关地图"),(View.Review,"↺","错题复习"),(View.Pet,"♡","宠物家园"),(View.Settings,"⚙","设置")];
     private static readonly string[] LessonSteps = ["学什么","知识讲解","例题演示","跟着做","独立练习","知识点闯关"];
     private bool loaded;
     private View view;
@@ -72,7 +72,7 @@ public partial class GameApp
     {
         View.Home=>"今天，也进步一点点",View.Courses=>"学习课堂",View.Lesson=>"一起来学新知识",
         View.Daily=>"每日练习",View.Map=>"闯关地图",View.Review=>"错题复习",View.Pet=>"宠物家园",
-        View.Shop=>"小岛商店",View.Bag=>"我的背包",View.Growth=>$"{State.PetName}的成长册",
+        View.Shop=>"小岛商店",View.Bag=>"我的背包",View.Growth=>$"{State.PetName}的成长册",View.Settings=>"设置",
         View.Quiz=>quiz?.Mode==StudyMode.Challenge?"知识点闯关":"专心练习",View.Result=>"本次学习收获",_=>"数学宠物岛"
     };
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -92,7 +92,6 @@ public partial class GameApp
     private async Task ChallengeTopic(Topic topic){selectedTopicId=topic.Id;await Start(StudyMode.Challenge);}
     private void SelectTopic(ChangeEventArgs e){selectedTopicId=e.Value?.ToString();}
     private async Task OpenLesson(){State.ViewedTopics.Add(Topic.Id);lessonStep=0;await Game.SaveAsync();await Navigate(View.Lesson);}
-    private async Task Imported(){selectedTopicId=null;await Go(View.Home);await JS.InvokeVoidAsync("mathPet.configureSound",State.SoundEnabled);}
     private Task Navigate(View next)
     {
         if(view==View.Quiz && quiz is {Completed:false})

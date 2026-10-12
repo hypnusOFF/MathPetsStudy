@@ -108,4 +108,4 @@ bash scripts/build-android.sh
 
 ## 正式发行与应用更新
 
-Android 已接入启动自动检查、手动检查更新，以及首页存档导出和确认导入。正式发行使用单独的 **Publish Android release** 工作流，固定签名、递增版本号，并上传公开的 APK、ZIP 与版本信息。首次发行前需要仓库所有者配置签名 Secrets；具体操作、旧体验包迁移及验证边界见 [更新与发行说明](docs/app-updates.md)。原有 Actions 体验包仍使用临时签名，不作为正式更新渠道。
+Android 已接入启动自动检查、设置页手动检查更新。进度自动保存在应用本地目录，不提供存档导入/导出入口。0.2.1 新增首页每日学习进度卡片。正式发行使用单独的 **Publish Android release** 工作流，固定签名、递增版本号，并上传公开的 APK、ZIP 与版本信息。首次发行前需要仓库所有者配置签名 Secrets；具体操作、旧体验包迁移及验证边界见 [更新与发行说明](docs/app-updates.md)。原有 Actions 体验包仍使用临时签名，不作为正式更新渠道。

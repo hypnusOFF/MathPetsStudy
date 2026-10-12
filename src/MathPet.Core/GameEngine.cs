@@ -4,6 +4,23 @@ public sealed class GameEngine(PlayerState state, TimeProvider? clock = null)
 {
     public PlayerState State { get; } = state;
     public TimeProvider Clock { get; } = clock ?? TimeProvider.System;
+    public int TodayAnsweredCount
+    {
+        get
+        {
+            var today = DateOnly.FromDateTime(Clock.GetLocalNow().DateTime);
+            if (State.DailyBonuses.Contains($"{today:yyyy-MM-dd}")) return 6;
+            return State.LearningDate == today ? State.DailyAnsweredCount : 0;
+        }
+    }
+    internal void RecordLearningAnswer()
+    {
+        var today = DateOnly.FromDateTime(Clock.GetLocalNow().DateTime);
+        var count = State.DailyBonuses.Contains($"{today:yyyy-MM-dd}") ? 6
+            : State.LearningDate == today ? State.DailyAnsweredCount : 0;
+        State.LearningDate = today;
+        State.DailyAnsweredCount = Math.Min(6, count + 1);
+    }
     public static readonly decimal[] GradeMultipliers = [1m, 1.15m, 1.3m, 1.5m, 1.75m, 2m];
     public static IReadOnlyList<ShopItem> Shop { get; } =
     [
@@ -327,6 +344,7 @@ public sealed class QuizSession
             mistake.LastAnswer = input; mistake.WrongCount++; mistake.LastAttempt = engine.Clock.GetUtcNow();
         }
         state.ViewedTopics.Add(q.TopicId);
+        engine.RecordLearningAnswer();
         answers.Add(result); Answered = true;
         return result;
     }

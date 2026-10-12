@@ -106,6 +106,8 @@ public sealed class PlayerState
     public List<Mistake> Mistakes { get; set; } = new();
     public HashSet<string> ViewedTopics { get; set; } = new();
     public HashSet<string> DailyBonuses { get; set; } = new();
+    public DateOnly? LearningDate { get; set; }
+    public int DailyAnsweredCount { get; set; }
     public DateTimeOffset LastSeen { get; set; } = DateTimeOffset.UtcNow;
 }
 public sealed record AnswerResult(bool Correct, int Points, bool TimedOut, string Submitted,

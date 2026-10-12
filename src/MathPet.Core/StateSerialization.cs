@@ -123,6 +123,8 @@ public static class StateSerialization
                 ||pet.ToyTrainingClaimed&&pet.IndependentAnswersToday<3)
                 throw new InvalidDataException("宠物培养数据不合法。");
         }
+        if (state.DailyAnsweredCount is < 0 or > 6 || state.LearningDate is null && state.DailyAnsweredCount != 0)
+            throw new InvalidDataException("每日学习进度不合法。");
         // A content correction may retire a deduplicated parameter variant.
         // Keep its mistake reviewable using the same topic and template.
         foreach(var mistake in state.Mistakes.Where(m=>Curriculum.FindQuestion(m.QuestionId) is null))

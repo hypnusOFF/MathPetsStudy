@@ -22,13 +22,21 @@ else
     <div class="side-pet"><b>🌱 每一点进步，都有陪伴</b><p>学会一个新知识，也让你的小伙伴长大一点。</p><button class="btn secondary" @onclick="() => Navigate(View.Pet)">去看看@(State.PetName) →</button></div>
 </aside>
 <main class="content">
-<AppMaintenance AllowImport="@(view == View.Home)" OnImported="Imported" />
 <header class="topbar"><div><div class="eyebrow">MATH & LITTLE FRIENDS</div><h1>@PageTitle</h1></div><div class="wallet"><span class="coin" data-testid="wallet">✦ @State.Coins 积分</span><span class="avatar">🙂</span></div></header>
+<AppMaintenance ShowSettings="@(view == View.Settings)" OnOpenSettings="() => Navigate(View.Settings)" />
 @if (Game.StorageError is not null) { <div class="storage-error" role="alert">@Game.StorageError</div> }
 @switch (view)
 {
 case View.Home:
     <div class="hero"><div><span class="pill">🌱 学数学 · 养伙伴</span><h2>每一次思考，<br>都让小岛更美好。</h2><p class="muted">从一个知识点开始。@(State.PetName) 已经准备好，陪你一起学习、挑战和成长。</p><div class="flex"><button class="btn" @onclick="() => Navigate(View.Courses)">开始学习 →</button><button class="btn ghost" @onclick="() => Navigate(View.Pet)">看看@(State.PetName)</button></div></div><PetPortrait Species="@State.ActiveSpecies" Stage="@VisualStage" Name="@State.PetName" Headwear="@State.ActivePet.Headwear" Accessory="@State.ActivePet.Accessory" HideStageDecoration="@State.ActivePet.HideStageDecoration" ReducedMotion="@State.ReducedMotion" /></div>
+    <div class="card daily-goal" data-testid="daily-learning-goal">
+        <div class="flex" style="justify-content:space-between"><h3>每日学习进度</h3><span class="tag purple">0.2.1 新增</span></div>
+        <p class="stat">今日已完成 <span data-testid="daily-learning-count">@Engine.TodayAnsweredCount/6</span> 题</p>
+        <div class="progress" role="progressbar" aria-label="今日学习进度" aria-valuemin="0" aria-valuemax="6" aria-valuenow="@Engine.TodayAnsweredCount"><i style="width:@(Engine.TodayAnsweredCount*100/6)%"></i></div>
+        @if(Engine.TodayAnsweredCount>=6){<p class="goal-complete">今日目标达成 ✓</p>}
+        else{<p class="muted tiny">每天练习6道题，让进步看得见。各类练习都计入，答错也没关系。</p>}
+        <button class="btn secondary" @onclick="() => Navigate(View.Daily)">继续今日练习 →</button>
+    </div>
     <div class="section"><h2>我的学习计划</h2><span class="muted tiny">按自己的节奏，一步一步来</span></div>
     <div class="grid">
         <div class="card"><span class="icon">▤</span><h3>继续学 · @Topic.Name</h3><p class="muted tiny">@GradeName 年级 · @(State.Semester == Semester.First ? "上册" : "下册")</p><button class="btn secondary" @onclick="OpenLesson">进入课堂</button></div>
@@ -156,6 +164,10 @@ case View.Review:
         @if(question is not null){<div class="card" style="margin-top:15px" @key="mistake.QuestionId"><span class="tag purple">@Curriculum.GradeNames[question.Grade-1]年级 · 待巩固</span><h3>@question.Text</h3><p class="muted tiny">上次答案：@mistake.LastAnswer · 错误 @mistake.WrongCount 次</p><details class="step"><summary>查看解题思路</summary>@foreach(var step in question.Solution){<p>@step</p>}<p>常见错误：@question.CommonMistake</p></details><button class="btn secondary" @onclick="() => Start(StudyMode.Review,mistake.QuestionId)">试试相似题</button></div>}
     }
     break;
+case View.Settings:
+    <div class="card settings"><h3>表现设置</h3><label><input type="checkbox" @bind="State.ReducedMotion" @bind:after="SettingsChanged"/> 减少动画</label><label><input type="checkbox" @bind="State.SoundEnabled" @bind:after="SettingsChanged"/> 播放音效</label><p class="muted tiny">不影响学习奖励，设置保存在本设备。</p></div>
+    <div class="card local-save"><h3>本地进度</h3><p class="muted">学习进度和宠物数据自动保存在本设备的应用目录。</p><p class="muted tiny">同签名覆盖更新会保留进度；卸载应用或清除应用数据会删除本地存档。</p></div>
+    break;
 case View.Pet:
     <div class="two"><div class="card"><div class="flex" style="justify-content:space-between;margin-bottom:15px"><div><span class="tag">我的主宠物</span><h2 style="margin:9px 0">@(State.PetName) <span class="muted" style="font-size:14px">@Engine.PetStage</span></h2></div><div class="flex"><button class="btn ghost" @onclick="Rename">改名字</button><button class="btn ghost" @onclick="() => Navigate(View.Growth)">成长册 →</button></div></div>
         <RoomScene State="State"><PetPortrait Species="@State.ActiveSpecies" Stage="@VisualStage" Name="@State.PetName" Headwear="@State.ActivePet.Headwear" Accessory="@State.ActivePet.Accessory" HideStageDecoration="@State.ActivePet.HideStageDecoration" ReducedMotion="@State.ReducedMotion" FoodId="@State.ActivePet.SelectedFood" ToyId="@PlayArtId" @ref="petPortrait" /></RoomScene>
@@ -167,7 +179,7 @@ case View.Pet:
         <div class="card" style="margin-top:18px"><div class="flex"><button class="btn gold" @onclick="() => Navigate(View.Shop)">小岛商店</button><button class="btn ghost" @onclick="() => Navigate(View.Bag)">我的背包</button></div><p class="muted tiny">用学习积分购买食物、玩具和装饰。</p></div></div></div>
     <div class="section"><h2>我的伙伴</h2><span class="muted tiny">各自成长，积分和背包共享</span></div><div class="grid pet-collection">
     @foreach(var pet in State.Pets){<div class="card pet-choice" data-pet="@pet.Species"><PetPortrait Species="@pet.Species" Stage="@pet.Stage" Name="@pet.Name" Headwear="@pet.Headwear" Accessory="@pet.Accessory" HideStageDecoration="@pet.HideStageDecoration" ReducedMotion="@State.ReducedMotion"/><h3>@pet.Name · Lv.@pet.Level</h3><p class="muted tiny">经验 @pet.Experience · 饱腹 @pet.Fullness · 心情 @pet.Mood</p><button class="btn secondary" disabled="@(pet.Species==State.ActiveSpecies)" @onclick="()=>SelectPet(pet.Species)">@(pet.Species==State.ActiveSpecies?"当前主力":"设为主力")</button></div>}
-    </div><div class="card settings"><h3>表现设置</h3><label><input type="checkbox" @bind="State.ReducedMotion" @bind:after="SettingsChanged"/> 减少动画</label><label><input type="checkbox" @bind="State.SoundEnabled" @bind:after="SettingsChanged"/> 播放音效</label><p class="muted tiny">不影响学习奖励，设置保存在本设备。</p><button class="btn ghost" @onclick="RefillTestCoins">测试：补充积分至 99999</button></div>
+    </div><div class="card settings"><button class="btn ghost" @onclick="RefillTestCoins">测试：补充积分至 99999</button></div>
 
     break;
 case View.Shop:
