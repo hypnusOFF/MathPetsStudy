@@ -38,6 +38,7 @@ public partial class GameApp
     private string GradeName => Curriculum.GradeNames[State.Grade-1];
     private PetPortrait? petPortrait;
     private string VisualStage => State.ActivePet.Stage;
+    private string PlayArtId=>State.ActivePet.SelectedToy==""?(State.HasToy?"yarn":"plush-ball"):State.ActivePet.SelectedToy;
     private string feedbackAction="idle",resultAction="idle";
     private string rewardSpecies="cat",rewardName="团团";
     private PetProgress RewardPet=>State.Pets.Single(p=>p.Species==rewardSpecies);
@@ -45,6 +46,13 @@ public partial class GameApp
     private Task RemoveClothes(string slot)=>Equip(slot, "");
     private void CaptureReward(){rewardSpecies=quiz!.RewardSpecies;rewardName=quiz.RewardPetName;var pet=State.Pets.Single(p=>p.Species==rewardSpecies);rewardLevel=pet.Level;rewardStage=pet.Stage;}
     private async Task SelectPet(string species){Engine.SelectPet(species);await Game.SaveAsync();}
+    private async Task BuyFood(string id){var result=Engine.BuyFood(id);await Game.SaveAsync();Notify(result.Message);}
+    private async Task BuyToy(string id){var result=Engine.BuyToy(id);await Game.SaveAsync();Notify(result.Message);}
+    private async Task ChooseFood(string id){Engine.SelectFood(id);await Game.SaveAsync();}
+    private async Task ChooseToy(string id){Engine.SelectToy(id);await Game.SaveAsync();}
+    private Task FoodSelectionChanged(ChangeEventArgs e)=>ChooseFood(e.Value?.ToString()??"apple");
+    private Task ToySelectionChanged(ChangeEventArgs e)=>ChooseToy(e.Value?.ToString()??"");
+    private async Task UnlockPet(string species){var result=Engine.UnlockPet(species);await Game.SaveAsync();Notify(result.Message);}
     private async Task BuyClothes(string id){var result=Engine.BuyWearable(id);await Game.SaveAsync();Notify(result.Message);}
     private async Task Equip(string slot,string id){Engine.Equip(slot,id);await Game.SaveAsync();}
     private async Task RestoreDecoration(){State.ActivePet.Accessory="";State.ActivePet.HideStageDecoration=false;await Game.SaveAsync();}
@@ -134,13 +142,13 @@ public partial class GameApp
     }
     private async Task Feed()
     {
-        var food=State.Food; var stage=VisualStage; var text=Engine.Feed();
+        var species=State.ActiveSpecies;var foodId=State.ActivePet.SelectedFood;var food=Engine.FoodCount(foodId); var stage=VisualStage; var text=Engine.Feed();
         await Game.SaveAsync(); Notify(text);
-        if(State.Food<food)await Sound("feed");
-        if(view==View.Pet && petPortrait is not null && State.Food<food && stage==VisualStage)
+        if(Engine.FoodCount(foodId)<food)await Sound("feed");
+        if(view==View.Pet && petPortrait is not null && State.ActiveSpecies==species && Engine.FoodCount(foodId)<food && stage==VisualStage)
             await petPortrait.PlayAsync("feed");
     }
-    private async Task Play(){var text=Engine.Play();await Game.SaveAsync();Notify(text);await Sound("play");if(view==View.Pet && petPortrait is not null)await petPortrait.PlayAsync("play");}
+    private async Task Play(){var species=State.ActiveSpecies;var stage=VisualStage;var text=Engine.Play();await Game.SaveAsync();Notify(text);await Sound("play");if(view==View.Pet && petPortrait is not null && State.ActiveSpecies==species && stage==VisualStage)await petPortrait.PlayAsync("play");}
     private async Task Care(){var text=Engine.Care();await Game.SaveAsync();Notify(text);await Sound("pet");if(view==View.Pet && petPortrait is not null)await petPortrait.PlayAsync("pet");}
     private async Task Sound(string name){if(State.SoundEnabled)try{await JS.InvokeVoidAsync("mathPet.sound",name);}catch(JSException){}}
     private async Task Buy(ItemKind kind){var result=Engine.Buy(kind);await Game.SaveAsync();Notify(result.Message);}

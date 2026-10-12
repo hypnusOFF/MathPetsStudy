@@ -1,0 +1,25 @@
+{
+  "assets": [
+    {
+      "id": "items",
+      "path": "items.png",
+      "size": [
+        1536,
+        1024
+      ],
+      "sha256": "6d5c345fbb7316add1a1545959876f8e1ad21aa34cd9a3c28013e8341d1e4be9"
+    }
+  ],
+  "grid": [
+    3,
+    2
+  ],
+  "items": [
+    "cookie",
+    "rainbow-meal",
+    "star-feast",
+    "plush-ball",
+    "puzzle-wheel",
+    "treasure-box"
+  ]
+}

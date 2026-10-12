@@ -1,21 +1,21 @@
 @implements IDisposable
 @inject IJSRuntime JS
 <div class="pet-art" style="animation:none">
-    <div class="pet-motion" @ref="motion" data-action="@action" data-species="@Species" data-motion="@(ReducedMotion ? "reduced" : "full")" style="--pet-duration:@(Duration(action))ms">
+    <div class="pet-motion" @ref="motion" data-action="@action" data-species="@Species" data-stage="@Stage" data-motion="@(ReducedMotion ? "reduced" : "full")" style="--pet-duration:@(Duration(action))ms">
         <span class="pet-shadow" aria-hidden="true"></span>
-        <div class="pet-base"><img class="pet-sprite sprite-@(Species)-@(Stage)" src="@Sprite(Stage)" alt="@Name" draggable="false" /></div>
-        <div class="pet-expression" aria-hidden="true"><img class="pet-sprite sprite-@(Species)-@(Stage)-closed" src="_content/MathPet.UI/pet-animation/sprites/@(Species)-@(Stage)-closed.png" /></div>
+        <div class="pet-base"><PetSprite Species="@Species" Stage="@Stage" Name="@Name"/></div>
+        <div class="pet-expression" aria-hidden="true"><PetSprite Species="@Species" Stage="@Stage" Closed="true"/></div>
         @if(Headwear!=""){<PetDecoration Id="@Headwear" Class="@($"pet-clothes clothes-head clothes-{Species}")"/>}
         @if(Accessory!=""||Stage!="baby"&&!HideStageDecoration){<PetDecoration Id="@(Accessory!=""?Accessory:Species=="fox"?"star-clip":"bow")" Class="@($"pet-clothes clothes-accessory clothes-{Species} clothes-{Accessory} {(Accessory==""?"signature":"")}")"/>}
         @if (action == "evolve" && previousStage is not null)
         {
-            <img class="pet-sprite pet-old sprite-@(Species)-@(previousStage)" src="@Sprite(previousStage)" alt="" aria-hidden="true" draggable="false" />
+            <PetSprite Species="@Species" Stage="@previousStage" Class="pet-old"/>
         }
         @if(action is "upgrade" or "evolve"){<span class="pet-ring" aria-hidden="true"></span>}
         @if(action=="encourage"){<span class="pet-effect pet-heart" aria-hidden="true">♥</span>}
         @if(action is "correct" or "upgrade" or "evolve"){<span class="pet-effect pet-star" aria-hidden="true">✦</span>}
-        @if(action=="feed"){<img class="pet-effect pet-food" src="_content/MathPet.UI/pet-assets/items/apple.svg" alt="" aria-hidden="true" />}
-        @if(action=="play"){<img class="pet-effect pet-toy" src="_content/MathPet.UI/pet-assets/items/ball.svg" alt="" aria-hidden="true" />}
+        @if(action=="feed"){<CareItemArt Id="@FoodId" Class="pet-effect pet-food"/>}
+        @if(action=="play"){<CareItemArt Id="@ToyId" Class="pet-effect pet-toy"/>}
     </div>
 </div>
 @code {
@@ -26,6 +26,8 @@
     [Parameter] public string Accessory {get;set;}="";
     [Parameter] public bool HideStageDecoration {get;set;}
     [Parameter] public string Trigger {get;set;}="idle";
+    [Parameter] public string FoodId {get;set;}="apple";
+    [Parameter] public string ToyId {get;set;}="plush-ball";
     private string lastTrigger="idle";
     [Parameter] public bool ReducedMotion { get; set; }
     private string action = "idle";
@@ -34,12 +36,11 @@
     private bool restartAnimation;
     private bool disposed;
     private CancellationTokenSource? playback;
-    private string Sprite(string stage) => $"_content/MathPet.UI/pet-animation/sprites/{Species}-{stage}.png";
     private static int Duration(string value) => value switch
     { "pet" => 1400, "feed" or "play" => 2200, "correct" => 1500, "encourage" => 1600, "upgrade" => 2000, "evolve" => 2600, _ => 0 };
     protected override async Task OnParametersSetAsync()
     {
-        if (Species is not ("cat" or "rabbit" or "fox") || Stage is not ("baby" or "young" or "mature"))
+        if (!PetCatalog.Pets.Any(p=>p.Species==Species) || Stage is not ("baby" or "young" or "mature"))
             throw new ArgumentException("Unknown pet species or evolution stage.");
         if(Trigger!=lastTrigger){lastTrigger=Trigger;if(Trigger!="idle") _=PlayAsync(Trigger);}
         var oldStage = lastStage;

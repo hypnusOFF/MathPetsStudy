@@ -42,7 +42,7 @@ public sealed class GameTests
     {
         var engine=new GameEngine(new());
         var scores=Enumerable.Range(1,6).Select(g=>engine.Score(Curriculum.ForGrade(g).Questions[0],false,false)).ToList();
-        Assert.Equal(new[]{10,13,16,20,25,30},scores);
+        Assert.Equal(new[]{10,12,13,15,18,20},scores);
     }
     [Fact] public void DuplicateSubmissionAndPrematureFinishCannotEarnRewards()
     {
@@ -102,7 +102,7 @@ public sealed class GameTests
     [Fact] public void FirstPassBonusCannotBeClaimedTwiceOrRepeatedByFinish()
     {
         var state=new PlayerState();var engine=new GameEngine(state);var session=engine.Start(StudyMode.Challenge,6);
-        var first=Complete(session);var coins=state.Coins;Assert.Equal(60,first.CompletionBonus);Assert.Equal(3,first.Stars);
+        var first=Complete(session);var coins=state.Coins;Assert.Equal(40,first.CompletionBonus);Assert.Equal(3,first.Stars);
         Assert.Same(first,session.Finish());Assert.Equal(coins,state.Coins);
         var second=Complete(engine.Start(StudyMode.Challenge,6));Assert.Equal(0,second.CompletionBonus);Assert.True(second.QuestionPoints<first.QuestionPoints);
     }
@@ -125,10 +125,13 @@ public sealed class GameTests
         Assert.False(engine.Buy(ItemKind.Ribbon).Success);Assert.False(engine.Buy(ItemKind.Toy).Success);
         Assert.Equal(40,state.Coins);Assert.True(engine.Buy(ItemKind.Food).Success);Assert.Equal(3,state.Food);
     }
-    [Fact] public void FeedingDoesNotConsumeFoodAtFullnessCap()
+    [Fact] public void FullPetsCanGrowFromFoodButDoNotConsumeItAfterDailyGrowthCap()
     {
-        var state=new PlayerState{Fullness=100};var engine=new GameEngine(state);engine.Feed();Assert.Equal(2,state.Food);
-        state.Fullness=90;engine.Feed();Assert.Equal(100,state.Fullness);Assert.Equal(1,state.Food);Assert.Equal(22,state.Growth);
+        var state=new PlayerState{Fullness=100,Food=4};var engine=new GameEngine(state);
+        for(var i=0;i<3;i++)engine.Feed();
+        Assert.Equal(1,state.Food);Assert.Equal(32,state.ActivePet.Experience);Assert.Equal(100,state.Fullness);
+        engine.Feed();Assert.Equal(1,state.Food);Assert.Equal(32,state.ActivePet.Experience);
+        state.Fullness=90;engine.Feed();Assert.Equal(0,state.Food);Assert.Equal(100,state.Fullness);Assert.Equal(32,state.ActivePet.Experience);
     }
     [Fact] public void LongAbsenceHasSafeFloorsAndNoGrowthLoss()
     {

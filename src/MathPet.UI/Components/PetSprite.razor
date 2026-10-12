@@ -1,0 +1,20 @@
+@if(Species is "cat" or "rabbit" or "fox")
+{
+    <img class="@SpriteClass" src="@ImagePath" alt="@Name" draggable="false"/>
+}
+else
+{
+    <span class="pet-sprite pet-atlas @Class" role="img" aria-label="@Name"
+          style="@AtlasStyle"></span>
+}
+@code {
+    [Parameter] public string Species {get;set;}="cat";
+    [Parameter] public string Stage {get;set;}="baby";
+    [Parameter] public bool Closed {get;set;}
+    [Parameter] public string Name {get;set;}="";
+    [Parameter] public string Class {get;set;}="";
+    private int Position=>Stage=="baby"?0:Stage=="young"?50:100;
+    private string SpriteClass=>$"pet-sprite sprite-{Species}-{Stage}{(Closed?"-closed":"")} {Class}";
+    private string ImagePath=>$"_content/MathPet.UI/pet-animation/sprites/{Species}-{Stage}{(Closed?"-closed":"")}.png";
+    private string AtlasStyle=>$"background-image:url('_content/MathPet.UI/pet-animation/new-pets/{Species}-{(Closed?"closed":"open")}.png');background-position:{Position}% 0%";
+}

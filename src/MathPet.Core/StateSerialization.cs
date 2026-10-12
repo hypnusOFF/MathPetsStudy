@@ -11,7 +11,7 @@ public static class StateSerialization
         using var document=JsonDocument.Parse(text);
         var root=document.RootElement;
         var version=root.TryGetProperty("Version",out var v)?v.GetInt32():1;
-        if(version is not (1 or 2 or 3))throw new InvalidDataException("此存档版本暂不支持，请保留原文件。");
+        if(version is not (1 or 2 or 3 or 4))throw new InvalidDataException("此存档版本暂不支持，请保留原文件。");
         if(version==1)
         {
             var pet=state.Pets[0];
@@ -22,18 +22,24 @@ public static class StateSerialization
             if(growth is <0 or >100)throw new InvalidDataException("旧成长数据不合法。");
             var mature=growth>=100&&state.Stars is not null&&state.Stars.Count>0&&(state.ReviewedMistakes>0||state.CompletedPractices>=2);
             var young=growth>=50&&state.CompletedPractices>0;
-            pet.Experience=Math.Max(growth,PetProgress.RequiredExperience(mature?13:young?6:1));
+            pet.Experience=Math.Max(growth,PetProgress.LegacyRequiredExperience(mature?13:young?6:1));
             if(state.HasRibbon){state.OwnedWearables.Add("bow");if(state.WearingRibbon)pet.Headwear="bow";}
             if(state.UsingRoom)state.Room="spring";
             state.Version=2;
         }
-        if(state.Pets is null||state.Pets.Count!=3||state.Pets.Any(p=>p is null)||state.Pets.Select(p=>p.Species).Order().SequenceEqual(new[]{"cat","fox","rabbit"})==false
+        var requiredSpecies=new[]{"cat","fox","rabbit"};
+        if(state.Pets is null||state.Pets.Any(p=>p is null)||state.Pets.Count<3||state.Pets.Count>6
+            ||state.Pets.Select(p=>p.Species).Distinct().Count()!=state.Pets.Count
+            ||requiredSpecies.Any(species=>!state.Pets.Any(p=>p.Species==species))
+            ||state.Pets.Any(p=>!PetCatalog.Pets.Any(kind=>kind.Species==p.Species))
+            ||version<4&&state.Pets.Count!=3
             ||!state.Pets.Any(p=>p.Species==state.ActiveSpecies)||state.OwnedWearables is null
-            ||state.Room is not ("study" or "spring" or "stars"))throw new InvalidDataException("宠物存档不完整。");
+            ||!RoomCatalog.Themes.Any(r=>r.Id==state.Room)
+            ||version<4&&state.Room is not ("study" or "spring" or "stars"))throw new InvalidDataException("宠物存档不完整。");
         var allowedWearables = version < 3 ? GameEngine.Wardrobe.Concat(GameEngine.RetiredWearables).ToArray() : GameEngine.Wardrobe;
         foreach(var pet in state.Pets)
         {
-            if(string.IsNullOrWhiteSpace(pet.Name)||pet.Name.Length>12||pet.Experience<0||pet.Experience>PetProgress.MaxExperience
+            if(string.IsNullOrWhiteSpace(pet.Name)||pet.Name.Length>12||pet.Experience<0||pet.Experience>(version<4?1425:PetProgress.MaxExperience)
                 ||pet.Fullness is <30 or >100||pet.Mood is <40 or >100)throw new InvalidDataException("宠物数据不合法。");
             foreach(var pair in new[]{("head",pet.Headwear),("body",pet.Outfit),("accessory",pet.Accessory)})
                 if(pair.Item2!=""&&(!state.OwnedWearables.Contains(pair.Item2)||!allowedWearables.Any(w=>w.Id==pair.Item2&&w.Slot==pair.Item1)))throw new InvalidDataException("穿搭数据不合法。");
@@ -75,6 +81,39 @@ public static class StateSerialization
             || state.OwnedRoomDecorations.Any(id => !RoomCatalog.Decorations.Any(d => d.Id == id))
             || state.PlacedRoomDecorations.Any(id => !state.OwnedRoomDecorations.Contains(id)))
             throw new InvalidDataException("房间装饰数据不合法。");
+        if(version<4)
+        {
+            foreach(var pet in state.Pets)
+            {
+                var oldLevel=Enumerable.Range(1,20).Last(l=>pet.Experience>=PetProgress.LegacyRequiredExperience(l));
+                if(oldLevel==20)pet.Experience=PetProgress.MaxExperience;
+                else
+                {
+                    var oldStart=PetProgress.LegacyRequiredExperience(oldLevel);
+                    var oldSpan=PetProgress.LegacyRequiredExperience(oldLevel+1)-oldStart;
+                    var newStart=PetProgress.RequiredExperience(oldLevel);
+                    var newSpan=PetProgress.RequiredExperience(oldLevel+1)-newStart;
+                    pet.Experience=newStart+(int)((long)(pet.Experience-oldStart)*newSpan/oldSpan);
+                }
+                pet.SelectedFood="apple";pet.SelectedToy="";pet.CareDate=null;
+                pet.FoodGrowthCount=0;pet.IndependentAnswersToday=0;pet.ToyTrainingClaimed=false;
+            }
+            state.FoodInventory=new();state.OwnedToys=new();state.Version=4;
+        }
+        if(state.FoodInventory is null||state.OwnedToys is null
+            ||state.FoodInventory.Any(p=>p.Key=="apple"||p.Value<0||!PetCatalog.Foods.Any(f=>f.Id==p.Key))
+            ||state.OwnedToys.Any(id=>id=="yarn"||!PetCatalog.Toys.Any(t=>t.Id==id)))
+            throw new InvalidDataException("培养库存数据不合法。");
+        foreach(var pet in state.Pets)
+        {
+            if(!PetCatalog.Foods.Any(f=>f.Id==pet.SelectedFood)
+                ||pet.SelectedToy!=""&&(!PetCatalog.Toys.Any(t=>t.Id==pet.SelectedToy)
+                    ||pet.SelectedToy=="yarn"&&!state.HasToy||pet.SelectedToy!="yarn"&&!state.OwnedToys.Contains(pet.SelectedToy))
+                ||pet.FoodGrowthCount is <0 or >3||pet.IndependentAnswersToday is <0 or >3
+                ||pet.CareDate is null&&(pet.FoodGrowthCount!=0||pet.IndependentAnswersToday!=0||pet.ToyTrainingClaimed)
+                ||pet.ToyTrainingClaimed&&pet.IndependentAnswersToday<3)
+                throw new InvalidDataException("宠物培养数据不合法。");
+        }
         // A content correction may retire a deduplicated parameter variant.
         // Keep its mistake reviewable using the same topic and template.
         foreach(var mistake in state.Mistakes.Where(m=>Curriculum.FindQuestion(m.QuestionId) is null))

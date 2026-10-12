@@ -1,10 +1,86 @@
 {
-  "canvas": [
-    1600,
-    1000
-  ],
-  "coordinates": "item center in percent; see RoomCatalog.cs",
   "assets": [
+    {
+      "id": "autumn-bg",
+      "path": "autumn-bg.png",
+      "size": [
+        1586,
+        992
+      ],
+      "sha256": "4413a06d10911d40d254b805ac4a3add9dbd5640cbbe5443be567a1871b94f2f"
+    },
+    {
+      "id": "autumn-props",
+      "path": "autumn-props.png",
+      "size": [
+        1254,
+        1254
+      ],
+      "sha256": "e961335003bde6063193225b7db22492d19d54749de9036866b0e23cc9f16cee"
+    },
+    {
+      "id": "autumn-rug",
+      "path": "autumn-rug.png",
+      "size": [
+        1585,
+        992
+      ],
+      "sha256": "04e940145b07e3d1369a2ee1136d32d8f3c622d4df84ee9b2d39175bc69ccba6"
+    },
+    {
+      "id": "forest-bg",
+      "path": "forest-bg.png",
+      "size": [
+        1586,
+        992
+      ],
+      "sha256": "c9985be275fce9fabe895f2698d019c30b8081212692d067bd9718864949bdea"
+    },
+    {
+      "id": "forest-props",
+      "path": "forest-props.png",
+      "size": [
+        1254,
+        1254
+      ],
+      "sha256": "6a47ff0a59e11f6f5e281be31ccc015af6114e045bbc94c36b5a7600ef29df95"
+    },
+    {
+      "id": "forest-rug",
+      "path": "forest-rug.png",
+      "size": [
+        1584,
+        993
+      ],
+      "sha256": "e7c86a98499c2de4c48454b8d3bbcce3d22aca3f0f55bd46c18a43bdd1254299"
+    },
+    {
+      "id": "ocean-bg",
+      "path": "ocean-bg.png",
+      "size": [
+        1586,
+        992
+      ],
+      "sha256": "c6ffab04d6815eaa9f347b417b76875e9230214d858acfafd0b34277a916645d"
+    },
+    {
+      "id": "ocean-props",
+      "path": "ocean-props.png",
+      "size": [
+        1254,
+        1254
+      ],
+      "sha256": "766484ee4eea7bd3303beff447b7a78827ef384735e257eb6aba376a59a20043"
+    },
+    {
+      "id": "ocean-rug",
+      "path": "ocean-rug.png",
+      "size": [
+        1586,
+        992
+      ],
+      "sha256": "2d1977b60d10169097e507d0147294efb92de90e50a3f9282a87bd8e777fd44f"
+    },
     {
       "id": "spring-bench",
       "path": "spring-bench.png",
@@ -167,5 +243,15 @@
       ],
       "sha256": "79d1e8058c8d140885408da3e99825d09e33c2d8758ef79839be1752063f119c"
     }
-  ]
+  ],
+  "canvas": [
+    1600,
+    1000
+  ],
+  "coordinates": "item center in percent; see RoomCatalog.cs",
+  "atlasRowSplitPixels": {
+    "forest-props": 621,
+    "ocean-props": 663,
+    "autumn-props": 612
+  }
 }

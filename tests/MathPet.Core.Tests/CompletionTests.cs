@@ -20,7 +20,7 @@ public sealed class CompletionTests
  [Fact] public void MigrationPreservesOldEvolutionAndLearningProgress()
  {
   var state=StateSerialization.Deserialize("{\"Version\":1,\"Growth\":100,\"CompletedPractices\":2,\"PetName\":\"小团\",\"Coins\":999,\"HasRibbon\":true,\"WearingRibbon\":true,\"Stars\":{\"addition\":3}}");
-  Assert.Equal(3,state.Version);Assert.Equal(13,state.ActivePet.Level);Assert.Equal("mature",state.ActivePet.Stage);Assert.Equal("小团",state.PetName);Assert.Equal(999,state.Coins);Assert.Equal("bow",state.ActivePet.Headwear);Assert.Equal(0,state.Pets[1].Experience);
+  Assert.Equal(4,state.Version);Assert.Equal(13,state.ActivePet.Level);Assert.Equal("mature",state.ActivePet.Stage);Assert.Equal("小团",state.PetName);Assert.Equal(999,state.Coins);Assert.Equal("bow",state.ActivePet.Headwear);Assert.Equal(0,state.Pets[1].Experience);
   var restored=StateSerialization.Deserialize(StateSerialization.Serialize(state));Assert.Equal(state.ActivePet.Experience,restored.ActivePet.Experience);Assert.Equal(3,restored.Stars["addition"]);
  }
  [Fact] public void TwentyLevelsHaveStableEvolutionThresholds()

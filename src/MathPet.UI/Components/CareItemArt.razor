@@ -1,0 +1,15 @@
+@if(Id is "apple" or "yarn")
+{
+    <PetDecoration Icon="true" Id="@Id" Class="@Class" Label="@Label"/>
+}
+else
+{
+    <span class="care-item-art @Class" role="img" aria-label="@Label" style="background-position:@(Index%3*50)% @(Index/3*100)%"></span>
+}
+@code {
+    [Parameter] public string Id {get;set;}="apple";
+    [Parameter] public string Class {get;set;}="";
+    [Parameter] public string Label {get;set;}="";
+    private static readonly string[] Items=["cookie","rainbow-meal","star-feast","plush-ball","puzzle-wheel","treasure-box"];
+    private int Index=>Array.IndexOf(Items,Id) is var index && index>=0 ? index : 3;
+}

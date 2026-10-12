@@ -157,11 +157,14 @@ case View.Review:
     break;
 case View.Pet:
     <div class="two"><div class="card"><div class="flex" style="justify-content:space-between;margin-bottom:15px"><div><span class="tag">我的主宠物</span><h2 style="margin:9px 0">@(State.PetName) <span class="muted" style="font-size:14px">@Engine.PetStage</span></h2></div><div class="flex"><button class="btn ghost" @onclick="Rename">改名字</button><button class="btn ghost" @onclick="() => Navigate(View.Growth)">成长册 →</button></div></div>
-        <RoomScene State="State"><PetPortrait Species="@State.ActiveSpecies" Stage="@VisualStage" Name="@State.PetName" Headwear="@State.ActivePet.Headwear" Accessory="@State.ActivePet.Accessory" HideStageDecoration="@State.ActivePet.HideStageDecoration" ReducedMotion="@State.ReducedMotion" @ref="petPortrait" /></RoomScene>
-        <div class="flex" style="justify-content:center;margin-top:18px"><button class="btn secondary" @onclick="Feed" data-testid="feed">🍎 喂食 (@State.Food)</button><button class="btn secondary" @onclick="Play">🧶 玩耍</button><button class="btn secondary" @onclick="Care">✨ 清洁 / 抚摸</button></div></div>
+        <RoomScene State="State"><PetPortrait Species="@State.ActiveSpecies" Stage="@VisualStage" Name="@State.PetName" Headwear="@State.ActivePet.Headwear" Accessory="@State.ActivePet.Accessory" HideStageDecoration="@State.ActivePet.HideStageDecoration" ReducedMotion="@State.ReducedMotion" FoodId="@State.ActivePet.SelectedFood" ToyId="@PlayArtId" @ref="petPortrait" /></RoomScene>
+        <div class="care-selectors"><label>喂什么 <select aria-label="选择食物" value="@State.ActivePet.SelectedFood" @onchange="FoodSelectionChanged">@foreach(var food in PetCatalog.Foods){<option value="@food.Id">@food.Name（@Engine.FoodCount(food.Id)份）</option>}</select></label>
+        <label>玩什么 <select aria-label="选择玩具" value="@State.ActivePet.SelectedToy" @onchange="ToySelectionChanged"><option value="">默认玩耍</option>@foreach(var toy in PetCatalog.Toys.Where(t=>Engine.OwnsToy(t.Id))){<option value="@toy.Id">@toy.Name</option>}</select></label></div>
+        <p class="muted tiny">今天还可领取 @Engine.RemainingFoodGrowth 次喂食经验。训练：独立正确答题 @State.ActivePet.IndependentAnswersToday / 3 · @(State.ActivePet.ToyTrainingClaimed?"今日经验已领取":"每日可领取一次玩具训练经验")</p>
+        <div class="flex" style="justify-content:center;margin-top:18px"><button class="btn secondary" @onclick="Feed" data-testid="feed">🍎 喂食 (@Engine.FoodCount(State.ActivePet.SelectedFood))</button><button class="btn secondary" @onclick="Play" data-testid="play">🧶 玩耍</button><button class="btn secondary" @onclick="Care">✨ 清洁 / 抚摸</button></div></div>
     <div><div class="card"><h3 style="margin-top:0">@(State.PetName) 的状态</h3>@foreach(var stat in new[]{("饱腹",State.Fullness,"#dfb066"),("心情",State.Mood,"#8cb7a2"),("满级经验进度",State.ActivePet.Experience*100/PetProgress.MaxExperience,"#a28ae8")}){<div class="row" style="display:block"><div class="flex" style="justify-content:space-between"><span>@stat.Item1</span><span class="muted tiny">@stat.Item2 / 100</span></div><div class="progress"><i style="width:@(stat.Item2)%;background:@stat.Item3"></i></div></div>}<p class="muted tiny">不会死亡，等级不会倒退。饱腹最低30，心情最低40，离开几天也没关系。</p></div>
         <div class="card" style="margin-top:18px"><div class="flex"><button class="btn gold" @onclick="() => Navigate(View.Shop)">小岛商店</button><button class="btn ghost" @onclick="() => Navigate(View.Bag)">我的背包</button></div><p class="muted tiny">用学习积分购买食物、玩具和装饰。</p></div></div></div>
-    <div class="section"><h2>我的三位伙伴</h2><span class="muted tiny">各自成长，积分和背包共享</span></div><div class="grid pet-collection">
+    <div class="section"><h2>我的伙伴</h2><span class="muted tiny">各自成长，积分和背包共享</span></div><div class="grid pet-collection">
     @foreach(var pet in State.Pets){<div class="card pet-choice" data-pet="@pet.Species"><PetPortrait Species="@pet.Species" Stage="@pet.Stage" Name="@pet.Name" Headwear="@pet.Headwear" Accessory="@pet.Accessory" HideStageDecoration="@pet.HideStageDecoration" ReducedMotion="@State.ReducedMotion"/><h3>@pet.Name · Lv.@pet.Level</h3><p class="muted tiny">经验 @pet.Experience · 饱腹 @pet.Fullness · 心情 @pet.Mood</p><button class="btn secondary" disabled="@(pet.Species==State.ActiveSpecies)" @onclick="()=>SelectPet(pet.Species)">@(pet.Species==State.ActiveSpecies?"当前主力":"设为主力")</button></div>}
     </div><div class="card settings"><h3>表现设置</h3><label><input type="checkbox" @bind="State.ReducedMotion" @bind:after="SettingsChanged"/> 减少动画</label><label><input type="checkbox" @bind="State.SoundEnabled" @bind:after="SettingsChanged"/> 播放音效</label><p class="muted tiny">不影响学习奖励，设置保存在本设备。</p><button class="btn ghost" @onclick="RefillTestCoins">测试：补充积分至 99999</button></div>
 
@@ -169,13 +172,21 @@ case View.Pet:
 case View.Shop:
 case View.Bag:
     <div class="flex"><button class="btn ghost" @onclick="() => Navigate(View.Pet)">← 宠物家园</button><button class="btn secondary" @onclick="() => Navigate(view==View.Shop?View.Bag:View.Shop)">@(view==View.Shop?"查看背包":"去商店")</button></div><p class="muted">把每一点学习收获，变成@(State.PetName) 的小小快乐。</p>
-    <div class="grid shop">@foreach(var item in GameEngine.Shop.Where(i=>i.Kind is ItemKind.Food or ItemKind.Toy))
-    {
-        <div class="card shop-item"><PetDecoration Icon="true" Id="@(item.Kind==ItemKind.Food?"apple":item.Kind==ItemKind.Toy?"yarn":"book")" Class="item-art" Label="@item.Name"/><h3>@item.Name</h3><p class="muted tiny">@item.Description</p>
-        @if(view==View.Shop){<p class="coin">✦ @item.Price 积分</p><button class="btn @(item.Kind==ItemKind.Food?"gold":"secondary")" disabled="@(State.Coins<item.Price || item.Kind!=ItemKind.Food && Engine.Owns(item.Kind))" @onclick="() => Buy(item.Kind)">@(item.Kind!=ItemKind.Food && Engine.Owns(item.Kind)?"已拥有":"购买")</button>}
-        else {<p class="muted">拥有 @(item.Kind==ItemKind.Food?State.Food:Engine.Owns(item.Kind)?1:0) @(item.Kind==ItemKind.Food?"份":"件")</p><button class="btn secondary" disabled="@(!Engine.Owns(item.Kind))" @onclick="() => Use(item.Kind)">@UseLabel(item.Kind)</button>}
-        </div>
-    }</div>
+    <div class="section"><h2>点心与餐食</h2></div><p class="muted tiny">每天前三次喂食可获得培养经验，饱腹满时也可以用点心培养。次数用完后只恢复饱腹。</p>
+    <div class="grid shop">@foreach(var food in PetCatalog.Foods){<div class="card shop-item" data-food-item="@food.Id"><CareItemArt Id="@food.Id" Class="item-art" Label="@food.Name"/><h3>@food.Name</h3><p class="muted tiny">饱腹 +@food.Fullness · 培养经验 +@food.Experience</p>
+    @if(view==View.Shop){<p class="coin">@food.Price 积分</p><button class="btn gold" disabled="@(State.Coins<food.Price)" @onclick="()=>BuyFood(food.Id)">购买食物</button>}
+    else{<p class="muted tiny">拥有 @Engine.FoodCount(food.Id) 份</p><button class="btn secondary" disabled="@(Engine.FoodCount(food.Id)==0||State.ActivePet.SelectedFood==food.Id)" @onclick="()=>ChooseFood(food.Id)">@(State.ActivePet.SelectedFood==food.Id?"当前点心":"选择点心")</button>}
+    </div>}</div>
+    <div class="section"><h2>玩具与训练</h2></div><p class="muted tiny">永久玩具，伙伴共享。每只宠物当天先完成并结算3道独立正确答题，每日最多领取一次训练经验；继续玩耍只增加心情。</p>
+    <div class="grid shop">@foreach(var toy in PetCatalog.Toys){<div class="card shop-item" data-toy-item="@toy.Id"><CareItemArt Id="@toy.Id" Class="item-art" Label="@toy.Name"/><h3>@toy.Name</h3><p class="muted tiny">心情 +@toy.Mood · 训练经验 +@toy.Experience</p>
+    @if(view==View.Shop){<p class="coin">@toy.Price 积分</p><button class="btn secondary" disabled="@(State.Coins<toy.Price||Engine.OwnsToy(toy.Id))" @onclick="()=>BuyToy(toy.Id)">@(Engine.OwnsToy(toy.Id)?"已拥有":"购买玩具")</button>}
+    else{<button class="btn secondary" disabled="@(!Engine.OwnsToy(toy.Id)||State.ActivePet.SelectedToy==toy.Id)" @onclick="()=>ChooseToy(toy.Id)">@(State.ActivePet.SelectedToy==toy.Id?"当前玩具":"选择玩具")</button>}
+    </div>}</div>
+    <div class="section"><h2>认识新伙伴</h2></div><div class="grid shop">@foreach(var kind in PetCatalog.Pets.Where(p=>p.Price>0)){<div class="card shop-item" data-pet-item="@kind.Species"><PetPortrait Species="@kind.Species" Name="@kind.Name" ReducedMotion="@State.ReducedMotion"/><h3>@kind.Name</h3><p class="muted tiny">独立成长 · 解锁后从1级开始</p>
+    @if(State.Pets.Any(p=>p.Species==kind.Species)){<p class="tag">已加入小岛</p>}
+    else if(view==View.Shop){<p class="coin">@kind.Price 积分</p><button class="btn secondary" disabled="@(State.Coins<kind.Price)" @onclick="()=>UnlockPet(kind.Species)">邀请伙伴</button>}
+    else{<p class="muted tiny">可在商店邀请</p>}
+    </div>}</div>
     <div class="section"><h2>头饰与宠物饰品</h2></div>
     @if(view==View.Bag){<div class="flex">@foreach(var slot in new[]{"head","accessory"}){var category=slot;<button class="btn ghost" @onclick="() => RemoveClothes(category)">卸下@(slot=="head"?"头饰":"饰品")</button>}<button class="btn ghost" @onclick="RestoreDecoration">恢复进化配饰</button></div>}
     <div class="grid shop">@foreach(var item in GameEngine.Wardrobe){<div class="card shop-item"><PetDecoration Id="@item.Id" Class="item-art" Label="@item.Name"/><h3>@item.Name</h3>@if(view==View.Shop){<p class="coin">@item.Price 积分</p><button class="btn secondary" disabled="@(State.Coins<item.Price||State.OwnedWearables.Contains(item.Id))" @onclick="()=>BuyClothes(item.Id)">@(State.OwnedWearables.Contains(item.Id)?"已拥有":"购买衣饰")</button>}else{<button class="btn secondary" disabled="@(!State.OwnedWearables.Contains(item.Id))" @onclick="()=>Equip(item.Slot,item.Id)">穿给@(State.PetName)</button>}</div>}</div>
@@ -187,7 +198,7 @@ case View.Bag:
         else{<p class="muted tiny">尚未解锁 · 可在商店购买</p>}
     </div>}</div>
     <div class="section"><h2>房间装饰</h2>@if(view==View.Bag){<button class="btn ghost" disabled="@(State.PlacedRoomDecorations.Count==0)" @onclick="ClearRoomDecorations">收起全部装饰</button>}</div><p class="muted tiny">每件装饰都有固定位置，可以搭配任意背景，也可以混搭不同主题。</p>
-    @foreach(var theme in RoomCatalog.Themes){<h3>@theme.Name</h3><div class="grid shop">@foreach(var decor in RoomCatalog.Decorations.Where(d=>d.Theme==theme.Id)){<div class="card shop-item" data-decor-item="@decor.Id"><img class="room-item-art" src="_content/MathPet.UI/room-assets/@(decor.Id).png" alt="@decor.Name"/><h3>@decor.Name</h3>
+    @foreach(var theme in RoomCatalog.Themes){<h3>@theme.Name</h3><div class="grid shop">@foreach(var decor in RoomCatalog.Decorations.Where(d=>d.Theme==theme.Id)){<div class="card shop-item" data-decor-item="@decor.Id"><RoomDecorationArt Item="decor" Class="room-item-art"/><h3>@decor.Name</h3>
         @if(view==View.Shop){<p class="coin">@decor.Price 积分</p><button class="btn secondary" disabled="@(State.Coins<decor.Price||State.OwnedRoomDecorations.Contains(decor.Id))" @onclick="()=>BuyRoomDecoration(decor.Id)">@(State.OwnedRoomDecorations.Contains(decor.Id)?"已拥有":"购买装饰")</button>}
         else{<button class="btn secondary" disabled="@(!State.OwnedRoomDecorations.Contains(decor.Id))" @onclick="()=>ToggleRoomDecoration(decor.Id)">@(State.PlacedRoomDecorations.Contains(decor.Id)?"收起装饰":"摆放装饰")</button>}
     </div>}</div>}
@@ -197,11 +208,11 @@ case View.Bag:
 case View.Growth:
     <button class="btn ghost" @onclick="() => Navigate(View.Pet)">← 宠物家园</button><div class="hero" style="margin-top:20px"><div><span class="pill">@(State.PetName) 的成长故事</span><h2>一起学习，一起长大。</h2><p class="muted">答对题目和喂食积累经验，达到6级和13级时进化。各年级都能达成，无需挑战高年级课程。</p></div><PetPortrait Species="@State.ActiveSpecies" Stage="@VisualStage" Name="@State.PetName" Headwear="@State.ActivePet.Headwear" Accessory="@State.ActivePet.Accessory" HideStageDecoration="@State.ActivePet.HideStageDecoration" ReducedMotion="@State.ReducedMotion" /></div>
     <div class="section"><h2>等级与进化</h2><span class="muted tiny">@State.PetName · Lv.@State.ActivePet.Level</span></div><div class="grid">@foreach(var stage in new[]{("幼年期",1,5),("初次进化",6,12),("最终进化",13,20)}){<div class="card"><h3>@stage.Item1 · Lv.@stage.Item2–@stage.Item3</h3><p class="muted tiny">@(stage.Item2==1?"没有装饰，开始陪伴。":stage.Item2==6?"解锁简单小配饰。":"毛色纹路出现，继续积累到20级。")</p><span class="tag">@(State.ActivePet.Level>=stage.Item2?"已到达":"继续积累经验")</span></div>}</div>
-    <p class="note">下一等级累计经验：@(State.ActivePet.Level==20?"已满级":PetProgress.RequiredExperience(State.ActivePet.Level+1).ToString())。练习奖励归开始时选定的伙伴；玩耍和抚摸不会刷经验。</p>
-    <div class="section"><h2>学习成就</h2></div><div class="card"><div class="row"><span>✦ 第一次关卡通关</span><span class="tag">@(State.Stars.Count>0?"已获得":"继续加油")</span></div><div class="row"><span>✎ 完成一次日常练习</span><span class="tag">@(State.CompletedPractices>0?"已获得":"继续加油")</span></div><div class="row"><span>↺ 独立答对一题相似题</span><span class="tag">@(State.ReviewedMistakes>0?"已获得":"继续加油")</span></div><p class="muted tiny">三只伙伴分别保存经验，等级不会倒退。</p></div>
+    <p class="note">下一等级累计经验：@(State.ActivePet.Level==20?"已满级":PetProgress.RequiredExperience(State.ActivePet.Level+1).ToString())。练习奖励归开始时选定的伙伴；普通玩耍与抚摸不加经验，训练玩具每日有一次经验奖励。</p>
+    <div class="section"><h2>学习成就</h2></div><div class="card"><div class="row"><span>✦ 第一次关卡通关</span><span class="tag">@(State.Stars.Count>0?"已获得":"继续加油")</span></div><div class="row"><span>✎ 完成一次日常练习</span><span class="tag">@(State.CompletedPractices>0?"已获得":"继续加油")</span></div><div class="row"><span>↺ 独立答对一题相似题</span><span class="tag">@(State.ReviewedMistakes>0?"已获得":"继续加油")</span></div><p class="muted tiny">每位伙伴分别保存经验，等级不会倒退。</p></div>
     break;
 }
-<div class="footer">数学宠物岛 · 离线学习与三宠物养成<br>@Curriculum.Topics.Count 个知识点 · 原创题库 · 教材最新版十二册目录尚未逐册核定<br><button @onclick="Reset">重置本机进度</button></div>
+<div class="footer">数学宠物岛 · 离线学习与宠物养成<br>@Curriculum.Topics.Count 个知识点 · 原创题库 · 教材最新版十二册目录尚未逐册核定<br><button @onclick="Reset">重置本机进度</button></div>
 </main></div>
 @if(toast is not null){<div class="toast" role="status">@toast</div>}
 @if(modalTitle is not null)

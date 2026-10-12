@@ -4,10 +4,10 @@ public sealed class GameEngine(PlayerState state, TimeProvider? clock = null)
 {
     public PlayerState State { get; } = state;
     public TimeProvider Clock { get; } = clock ?? TimeProvider.System;
-    public static readonly decimal[] GradeMultipliers = [1m, 1.3m, 1.6m, 2m, 2.5m, 3m];
+    public static readonly decimal[] GradeMultipliers = [1m, 1.15m, 1.3m, 1.5m, 1.75m, 2m];
     public static IReadOnlyList<ShopItem> Shop { get; } =
     [
-        new(ItemKind.Food,"苹果小点心","🍎",20,"饱腹 +20，经验 +2"),
+        new(ItemKind.Food,"苹果小点心","🍎",20,"饱腹 +20，经验 +4（每日前三次）"),
         new(ItemKind.Toy,"彩色毛线球","🧶",50,"永久玩具，玩耍心情 +15"),
         new(ItemKind.Ribbon,"紫色蝴蝶结","🎀",80,"可穿戴装饰，不影响答题"),
         new(ItemKind.Room,"春日小屋","🌷",100,"可切换的家园装饰")
@@ -157,18 +157,83 @@ public sealed class GameEngine(PlayerState state, TimeProvider? clock = null)
         }
         return (true,$"已购买{item.Name}，放入背包。");
     }
-    public string Feed()
+    public int FoodCount(string id) => id=="apple" ? State.Food : State.FoodInventory.GetValueOrDefault(id);
+    public bool OwnsToy(string id) => id=="yarn" ? State.HasToy : State.OwnedToys.Contains(id);
+    public (bool Success,string Message) BuyFood(string id)
     {
-        if (State.Food == 0) return "点心用完了，去商店看看吧。";
-        if (State.Fullness == 100) return $"{State.PetName}已经吃饱了，点心先存着吧。";
-        State.Food--; State.Fullness = Math.Min(100, State.Fullness + 20);
-        AddGrowth(2);
-        return $"{State.PetName}吃得很开心！饱腹增加，经验 +2。";
+        var food=PetCatalog.Foods.SingleOrDefault(f=>f.Id==id)??throw new ArgumentException("食物不存在。");
+        if(State.Coins<food.Price)return(false,"积分还不够。");
+        if(FoodCount(id)==int.MaxValue)return(false,"食物库存已满。");
+        State.Coins-=food.Price;
+        if(id=="apple")State.Food++;else State.FoodInventory[id]=FoodCount(id)+1;
+        return(true,"已购买"+food.Name);
     }
-    public string Play()
+    public (bool Success,string Message) BuyToy(string id)
     {
-        State.Mood = Math.Min(100, State.Mood + (State.HasToy ? 15 : 8));
-        return State.HasToy ? "一起玩毛线球，心情增加！" : "一起玩捉迷藏，心情增加！";
+        var toy=PetCatalog.Toys.SingleOrDefault(t=>t.Id==id)??throw new ArgumentException("玩具不存在。");
+        if(OwnsToy(id))return(false,"已经拥有这件玩具。");
+        if(State.Coins<toy.Price)return(false,"积分还不够。");
+        State.Coins-=toy.Price;
+        if(id=="yarn")State.HasToy=true;else State.OwnedToys.Add(id);
+        return(true,"已购买"+toy.Name);
+    }
+    public (bool Success,string Message) UnlockPet(string species)
+    {
+        var kind=PetCatalog.Pets.SingleOrDefault(p=>p.Species==species)??throw new ArgumentException("宠物不存在。");
+        if(State.Pets.Any(p=>p.Species==species))return(false,"已经拥有这位伙伴。");
+        if(State.Coins<kind.Price)return(false,"积分还不够。");
+        State.Coins-=kind.Price;State.Pets.Add(new PetProgress{Species=species,Name=kind.Name,Experience=0});
+        return(true,"欢迎"+kind.Name+"加入小岛！");
+    }
+    public void SelectFood(string id)
+    {
+        if(!PetCatalog.Foods.Any(f=>f.Id==id))throw new ArgumentException("食物不存在。");
+        State.ActivePet.SelectedFood=id;
+    }
+    public void SelectToy(string id)
+    {
+        if(id!=""&&(!PetCatalog.Toys.Any(t=>t.Id==id)||!OwnsToy(id)))throw new ArgumentException("请先购买这件玩具。");
+        State.ActivePet.SelectedToy=id;
+    }
+    public void RefreshCareDay(PetProgress pet)
+    {
+        var today=DateOnly.FromDateTime(Clock.GetLocalNow().DateTime);
+        if(pet.CareDate==today)return;
+        pet.CareDate=today;pet.FoodGrowthCount=0;pet.IndependentAnswersToday=0;pet.ToyTrainingClaimed=false;
+    }
+    public int RemainingFoodGrowth {get{RefreshCareDay(State.ActivePet);return 3-State.ActivePet.FoodGrowthCount;}}
+    public string Feed()=>Feed(State.ActivePet.SelectedFood);
+    public string Feed(string id)
+    {
+        var food=PetCatalog.Foods.SingleOrDefault(f=>f.Id==id)??throw new ArgumentException("食物不存在。");
+        var pet=State.ActivePet;RefreshCareDay(pet);
+        if(FoodCount(id)==0)return "这份点心用完了，去商店看看吧。";
+        var canGrow=pet.FoodGrowthCount<3&&pet.Experience<PetProgress.MaxExperience;
+        if(pet.Fullness==100&&!canGrow)return "已经吃饱了，本次不会增加经验，点心先存着吧。";
+        if(id=="apple")State.Food--;else State.FoodInventory[id]--;
+        pet.Fullness=Math.Min(100,pet.Fullness+food.Fullness);
+        var experience=canGrow?AddGrowth(food.Experience):0;
+        if(canGrow)pet.FoodGrowthCount++;
+        return $"{pet.Name}吃得很开心！本次经验 +{experience}。";
+    }
+    public string Play()=>Play(State.ActivePet.SelectedToy);
+    public string Play(string id)
+    {
+        if(id==""&&State.HasToy)id="yarn";
+        if(id!=""&&(!PetCatalog.Toys.Any(t=>t.Id==id)||!OwnsToy(id)))throw new ArgumentException("请先购买这件玩具。");
+        var toy=PetCatalog.Toys.SingleOrDefault(t=>t.Id==id);var pet=State.ActivePet;RefreshCareDay(pet);
+        pet.Mood=Math.Min(100,pet.Mood+(toy?.Mood??8));
+        if(toy is null)return "一起玩捉迷藏，心情增加！";
+        if(toy.Experience==0)return "一起玩毛线球，心情增加！";
+        if(pet.ToyTrainingClaimed)return "今天已经领取过训练经验，继续玩耍增加心情。";
+        if(pet.IndependentAnswersToday<3)return "先完成并结算3道独立正确答题，今天就能领取训练经验。";
+        var experience=AddGrowth(toy.Experience);pet.ToyTrainingClaimed=true;
+        return $"一起玩{toy.Name}，心情增加，训练经验 +{experience}！";
+    }
+    public int LearningExperience(Question q,bool usedHint)
+    {
+        var repeated=State.Progress.GetValueOrDefault(q.Id)?.CorrectCount>0;
+        return usedHint?(repeated?2:4):(repeated?3:6);
     }
     public string Care()
     {
@@ -238,7 +303,8 @@ public sealed class QuizSession
         if(check.RetryMessage is not null)throw new ArgumentException(check.RetryMessage);
         var correct = check.Correct;
         var points = correct ? engine.Score(q, HintCount > 0, IsChallenge && !TimedOut) : 0;
-        var result = new AnswerResult(correct,points,TimedOut,input,q,HintCount > 0);
+        var result = new AnswerResult(correct,points,TimedOut,input,q,HintCount > 0)
+        {LearningExperience=correct?engine.LearningExperience(q,HintCount>0):0};
         var state = engine.State;
         if (!state.Progress.TryGetValue(q.Id, out var progress)) state.Progress[q.Id] = progress = new();
         progress.AttemptCount++;
@@ -289,7 +355,10 @@ public sealed class QuizSession
         if (Mode is StudyMode.Daily or StudyMode.Practice) state.CompletedPractices++;
         if (Mode == StudyMode.Daily && state.DailyBonuses.Add($"{localDate:yyyy-MM-dd}")) bonus += 10;
         state.Coins += bonus;
-        var growth = engine.AddGrowth(answers.Sum(a=>a.Points)/2,RewardSpecies);
+        var rewardPet=state.Pets.Single(p=>p.Species==RewardSpecies);
+        engine.RefreshCareDay(rewardPet);
+        rewardPet.IndependentAnswersToday=Math.Min(3,rewardPet.IndependentAnswersToday+independent);
+        var growth = engine.AddGrowth(answers.Sum(a=>a.LearningExperience),RewardSpecies);
         summary = new(Mode,correct,Questions.Count,answers.Sum(a => a.Points),bonus,growth,passed,stars,Topic.Grade,
             Mode == StudyMode.Daily ? "跨知识点每日练习" : summaryName);
         return summary;

@@ -47,7 +47,7 @@ public class RoomDecorationTests
         old.CompletedPractices = 7;
         var migrated = StateSerialization.Deserialize(StateSerialization.Serialize(old));
         Assert.Equal(123 + 110 + 160 + 180 + 140, migrated.Coins);
-        Assert.Equal(3, migrated.Version); Assert.Equal("stars", migrated.Room);
+        Assert.Equal(4, migrated.Version); Assert.Equal("stars", migrated.Room);
         Assert.Equal(3, migrated.OwnedRooms.Count); Assert.Equal(7, migrated.CompletedPractices);
         Assert.All(migrated.Pets, p => Assert.Equal("", p.Outfit));
         Assert.Equal("", migrated.Pets[2].Accessory); Assert.Equal("bow", migrated.Pets[0].Headwear);

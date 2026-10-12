@@ -1,5 +1,5 @@
 {
-  "proposal": true,
+  "proposal": false,
   "multipliers": [
     1,
     1.15,
@@ -114,6 +114,7 @@
     {
       "grade": 1,
       "oldIncome": 3315,
+      "implementedIncome": 3315,
       "proposedIncome": 3315,
       "practice": 1035,
       "challenge": 1601,
@@ -122,6 +123,7 @@
     {
       "grade": 2,
       "oldIncome": 4554,
+      "implementedIncome": 4117,
       "proposedIncome": 4117,
       "practice": 1316,
       "challenge": 1989,
@@ -130,6 +132,7 @@
     {
       "grade": 3,
       "oldIncome": 6945,
+      "implementedIncome": 5684,
       "proposedIncome": 5684,
       "practice": 1824,
       "challenge": 2744,
@@ -138,6 +141,7 @@
     {
       "grade": 4,
       "oldIncome": 7981,
+      "implementedIncome": 6092,
       "proposedIncome": 6092,
       "practice": 1919,
       "challenge": 2870,
@@ -146,6 +150,7 @@
     {
       "grade": 5,
       "oldIncome": 12597,
+      "implementedIncome": 9066,
       "proposedIncome": 9066,
       "practice": 3101,
       "challenge": 4362,
@@ -154,6 +159,7 @@
     {
       "grade": 6,
       "oldIncome": 13178,
+      "implementedIncome": 8867,
       "proposedIncome": 8867,
       "practice": 2889,
       "challenge": 4248,
@@ -221,9 +227,9 @@
       "maxLevelDay": 139,
       "rounds": 139,
       "earned": 12103,
-      "foodCost": 5560,
+      "foodCost": 5520,
       "toyCost": 100,
-      "remainingCoins": 6563,
+      "remainingCoins": 6603,
       "repeatedQuestions": 88
     },
     {
@@ -260,9 +266,9 @@
       "maxLevelDay": 144,
       "rounds": 144,
       "earned": 17751,
-      "foodCost": 5760,
+      "foodCost": 5720,
       "toyCost": 100,
-      "remainingCoins": 12011,
+      "remainingCoins": 12051,
       "repeatedQuestions": 165
     },
     {

@@ -1,0 +1,25 @@
+@if(Item.Atlas is null)
+{
+    <img class="@Class" src="_content/MathPet.UI/room-assets/@(Item.Id).png" alt="@Item.Name"/>
+}
+else
+{
+    <span class="room-prop-atlas @Class" role="img" aria-label="@Item.Name"
+          style="@AtlasStyle"></span>
+}
+@code {
+    [Parameter, EditorRequired] public RoomDecoration Item {get;set;} = default!;
+    [Parameter] public string Class {get;set;} = "";
+    private string AtlasStyle
+    {
+        get
+        {
+            // Use the transparent gap between rows so no ornament edge is clipped.
+            var split=Item.Atlas=="ocean-props"?663:Item.Atlas=="forest-props"?621:612;
+            var height=Item.Tile<2?split:1254-split;
+            var scale=(125400.0/height).ToString("0.####",System.Globalization.CultureInfo.InvariantCulture);
+            var aspect=(627.0/height).ToString("0.####",System.Globalization.CultureInfo.InvariantCulture);
+            return $"background-image:url('_content/MathPet.UI/room-assets/{Item.Atlas}.png');background-size:200% {scale}%;background-position:{Item.Tile%2*100}% {Item.Tile/2*100}%;aspect-ratio:{aspect}";
+        }
+    }
+}

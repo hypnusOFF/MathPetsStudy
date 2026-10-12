@@ -53,15 +53,25 @@ public sealed class PetProgress
     public string Outfit { get; set; } = "";
     public string Accessory { get; set; } = "";
     public bool HideStageDecoration { get; set; }
+    public string SelectedFood { get; set; } = "apple";
+    public string SelectedToy { get; set; } = "";
+    public DateOnly? CareDate { get; set; }
+    public int FoodGrowthCount { get; set; }
+    public int IndependentAnswersToday { get; set; }
+    public bool ToyTrainingClaimed { get; set; }
     [JsonIgnore] public int Level => Enumerable.Range(1,20).Last(l => Experience >= RequiredExperience(l));
     [JsonIgnore] public string Stage => Level >= 13 ? "mature" : Level >= 6 ? "young" : "baby";
-    public static int RequiredExperience(int level) => (level-1)*25 + (level-1)*level*5/2;
-    public const int MaxExperience = 1425;
+    public static int RequiredExperience(int level)
+    {
+        var n=level-1;return 35*n+5*n*(n+1)/2+n*(n+1)*(2*n+1)/3;
+    }
+    public static int LegacyRequiredExperience(int level) => (level-1)*25+(level-1)*level*5/2;
+    public const int MaxExperience = 6555;
 }
 public sealed record Wearable(string Id,string Name,string Slot,int Price);
 public sealed class PlayerState
 {
-    public int Version { get; set; } = 3;
+    public int Version { get; set; } = 4;
     public string ActiveSpecies { get; set; } = "cat";
     public List<PetProgress> Pets { get; set; } = [new(), new(){Species="rabbit",Name="糯糯",Experience=0},new(){Species="fox",Name="星星",Experience=0}];
     public HashSet<string> OwnedWearables { get; set; } = new();
@@ -83,6 +93,8 @@ public sealed class PlayerState
     [JsonIgnore] public int Growth { get=>Math.Min(100,ActivePet.Experience); set=>ActivePet.Experience=value; }
     public int Food { get; set; } = 2;
     public bool HasToy { get; set; }
+    public Dictionary<string,int> FoodInventory { get; set; } = new();
+    public HashSet<string> OwnedToys { get; set; } = new();
     public bool HasRibbon { get; set; }
     public bool WearingRibbon { get; set; }
     public bool HasRoom { get; set; }
@@ -97,7 +109,10 @@ public sealed class PlayerState
     public DateTimeOffset LastSeen { get; set; } = DateTimeOffset.UtcNow;
 }
 public sealed record AnswerResult(bool Correct, int Points, bool TimedOut, string Submitted,
-    Question Question, bool UsedHint);
+    Question Question, bool UsedHint)
+{
+    public int LearningExperience { get; init; }
+}
 public sealed record SessionSummary(StudyMode Mode, int Correct, int Total, int QuestionPoints,
     int CompletionBonus, int GrowthGained, bool Passed, int Stars, int Grade, string TopicName);
 

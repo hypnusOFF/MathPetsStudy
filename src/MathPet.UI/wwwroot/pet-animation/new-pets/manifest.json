@@ -1,0 +1,67 @@
+{
+  "assets": [
+    {
+      "id": "dog-closed",
+      "path": "dog-closed.png",
+      "size": [
+        2172,
+        724
+      ],
+      "sha256": "f1b319442fde8c8543a0fcaba8a23b68c3b39fcfb4cfacdbc9e77758d9ac14f4"
+    },
+    {
+      "id": "dog-open",
+      "path": "dog-open.png",
+      "size": [
+        2172,
+        724
+      ],
+      "sha256": "4f937b52b8d8f5c429aff7c2fb057cda041073a19978711212583fe2b9ac6434"
+    },
+    {
+      "id": "otter-closed",
+      "path": "otter-closed.png",
+      "size": [
+        2172,
+        724
+      ],
+      "sha256": "26e27c9f3d57b17ac82bb9d566018e5c016fe17d2a3d549888f787ac2cd2e211"
+    },
+    {
+      "id": "otter-open",
+      "path": "otter-open.png",
+      "size": [
+        2172,
+        724
+      ],
+      "sha256": "2b130cfee29468aeea54cc4153ee9fcec3673597923b4784da813e92910b85be"
+    },
+    {
+      "id": "redpanda-closed",
+      "path": "redpanda-closed.png",
+      "size": [
+        2172,
+        724
+      ],
+      "sha256": "933451b58b22505fd6e55379a2e14131f91fb660f37ffff0451c77e2c087a203"
+    },
+    {
+      "id": "redpanda-open",
+      "path": "redpanda-open.png",
+      "size": [
+        2172,
+        724
+      ],
+      "sha256": "2301aa5f24c5c6d0dc1e88779d4cac2fe69f335478a42fcfe35fc0720bc3c546"
+    }
+  ],
+  "grid": [
+    3,
+    1
+  ],
+  "stages": [
+    "baby",
+    "young",
+    "mature"
+  ]
+}
