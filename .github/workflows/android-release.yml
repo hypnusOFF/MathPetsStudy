@@ -82,9 +82,12 @@ jobs:
         run: |
           cat > "$RUNNER_TEMP/release-notes.md" <<'NOTES'
           下载 ZIP，解压后安装 APK；应用内更新入口可直接下载 APK。
-          同签名更新通常保留存档。早期临时签名体验包可能无法覆盖安装，请先导出存档并保存到应用外，安装后导入。
+          同签名更新通常保留存档。早期临时签名体验包可能无法覆盖安装；卸载会删除本地进度，需保留数据时不要直接卸载。
           个人及家庭非商业使用按仓库 LICENSE 授权，其他用途需另获授权。
           NOTES
+          if [[ -f "docs/releases/$MATHPET_VERSION.md" ]]; then
+            cp "docs/releases/$MATHPET_VERSION.md" "$RUNNER_TEMP/release-notes.md"
+          fi
       - name: Publish reviewed main build
         run: |
           gh release create "v$MATHPET_VERSION" \
