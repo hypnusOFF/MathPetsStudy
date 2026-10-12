@@ -1,0 +1,67 @@
+name: Set up Android signing
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: android-release-signing-setup
+  cancel-in-progress: false
+jobs:
+  setup:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Check configuration without exposing values
+        id: check
+        env:
+          GH_TOKEN: ${{ secrets.MATHPET_BOOTSTRAP_TOKEN }}
+          EXISTING_KEYSTORE: ${{ secrets.ANDROID_RELEASE_KEYSTORE_BASE64 }}
+          EXISTING_PASSWORD: ${{ secrets.ANDROID_RELEASE_PASSWORD }}
+        run: |
+          set -euo pipefail
+          if [[ -n "$EXISTING_KEYSTORE" && -n "$EXISTING_PASSWORD" ]]; then
+            echo 'ready=true' >> "$GITHUB_OUTPUT"
+            echo 'Fixed signing already configured; keys will not be replaced.' >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+          if [[ -n "$EXISTING_KEYSTORE" || -n "$EXISTING_PASSWORD" ]]; then
+            echo '::error::Only one signing secret exists. Stop to protect the existing key; complete its matching configuration before retrying.'
+            exit 1
+          fi
+          if [[ -z "$GH_TOKEN" ]]; then
+            echo '::error::Add repository Actions secret MATHPET_BOOTSTRAP_TOKEN with Secrets read/write permission, then rerun.'
+            exit 1
+          fi
+          gh api repos/hypnusOFF/MathPetsStudy/actions/secrets/public-key --jq .key_id >/dev/null
+          echo 'ready=false' >> "$GITHUB_OUTPUT"
+      - uses: actions/setup-java@v5
+        if: steps.check.outputs.ready == 'false'
+        with:
+          distribution: temurin
+          java-version: '21'
+      - name: Generate and store fixed private signing key
+        if: steps.check.outputs.ready == 'false'
+        env:
+          GH_TOKEN: ${{ secrets.MATHPET_BOOTSTRAP_TOKEN }}
+        run: |
+          set -euo pipefail
+          umask 077
+          mathpet_setup_dir="$RUNNER_TEMP/mathpet-signing-setup"
+          mkdir -p "$mathpet_setup_dir"
+          openssl rand -base64 36 > "$mathpet_setup_dir/password.txt"
+          keytool -genkeypair -keystore "$mathpet_setup_dir/release.keystore" \
+            -storepass:file "$mathpet_setup_dir/password.txt" -keypass:file "$mathpet_setup_dir/password.txt" \
+            -alias mathpet -keyalg RSA -keysize 3072 -validity 10000 -dname 'CN=MathPet Release'
+          keytool -list -keystore "$mathpet_setup_dir/release.keystore" \
+            -storepass:file "$mathpet_setup_dir/password.txt" -alias mathpet >/dev/null
+          gh secret set ANDROID_RELEASE_PASSWORD --repo hypnusOFF/MathPetsStudy < "$mathpet_setup_dir/password.txt"
+          base64 < "$mathpet_setup_dir/release.keystore" | tr -d '\n' | \
+            gh secret set ANDROID_RELEASE_KEYSTORE_BASE64 --repo hypnusOFF/MathPetsStudy
+          gh secret list --repo hypnusOFF/MathPetsStudy --json name --jq '.[].name' | \
+            python3 -c 'import sys; names=set(sys.stdin.read().split()); assert {"ANDROID_RELEASE_PASSWORD","ANDROID_RELEASE_KEYSTORE_BASE64"} <= names'
+          echo 'Fixed signing created and saved in repository Actions Secrets. No signing files were published.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Reruns preserve existing keys. An independent offline backup has not been created.' >> "$GITHUB_STEP_SUMMARY"
+      - name: Remove runner signing files
+        if: always()
+        run: rm -rf "$RUNNER_TEMP/mathpet-signing-setup"

@@ -39,6 +39,26 @@ bash scripts/configure-release-signing.sh
 不要把秘密值发到聊天或提交到 Git。也可由所有者在仓库 Settings → Secrets and variables → Actions
 手动配置上述两个 Secrets，内容须与别名 mathpet 的固定 keystore 匹配。
 
+## 仅使用网页的签名配置方式
+
+当 Codex 云代理仍将 GitHub API 请求识别为平台应用授权时，向云环境填写临时令牌
+不一定能获得 Secrets 写权限。可以把相同临时令牌直接填入 GitHub 仓库 Actions Secrets，
+由 GitHub 自身的 runner 配置签名，避免依赖云代理的凭据选择。
+
+1. 打开仓库 Settings → Secrets and variables → Actions → New repository secret。
+2. 名称填 `MATHPET_BOOTSTRAP_TOKEN`，值为仅授权本仓库 Secrets read/write 的临时令牌。
+3. 在 main 上运行 Actions → **Set up Android signing**。
+
+工作流先检查凭据权限，再生成固定密钥并把 keystore 和密码保存到两个发行 Secrets。
+不会输出密码、上传私钥文件或替换已有完整签名。若仅有一个发行 Secret，停止处理，
+避免误换已有签名。签名文件只在临时 runner 中存在，结束时清理。
+此方式的持久密钥保存在 GitHub Actions Secrets；尚无独立离线备份，不能删除或覆盖它们。
+GitHub Secrets API 无法读回秘密值。独立备份需要后续单独配置受保护的导出流程，
+不能把原始密钥作为公开 Release 或 artifact 发布。
+
+确认签名配置成功后，再运行正式发行工作流。临时令牌仅用于初始化，
+成功后可删除 `MATHPET_BOOTSTRAP_TOKEN` 并在 GitHub 撤销令牌，正常发行不需要它。
+
 ## 发布
 
 打开 Actions → **Publish Android release** → Run workflow，在 main 上输入未发布过的数字版本，
