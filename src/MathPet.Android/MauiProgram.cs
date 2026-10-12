@@ -10,6 +10,7 @@ public static class MauiProgram
         builder.Services.AddSingleton<IPlayerStore,FilePlayerStore>();
         builder.Services.AddSingleton<GameState>();
         builder.Services.AddSingleton<ITeachingVideoPlayer,AndroidTeachingVideoPlayer>();
+        builder.Services.AddSingleton<IAppMaintenance,AndroidAppMaintenance>();
         return builder.Build();
     }
 }

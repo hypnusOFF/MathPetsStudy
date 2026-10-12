@@ -22,6 +22,7 @@ else
     <div class="side-pet"><b>🌱 每一点进步，都有陪伴</b><p>学会一个新知识，也让你的小伙伴长大一点。</p><button class="btn secondary" @onclick="() => Navigate(View.Pet)">去看看@(State.PetName) →</button></div>
 </aside>
 <main class="content">
+<AppMaintenance AllowImport="@(view == View.Home)" OnImported="Imported" />
 <header class="topbar"><div><div class="eyebrow">MATH & LITTLE FRIENDS</div><h1>@PageTitle</h1></div><div class="wallet"><span class="coin" data-testid="wallet">✦ @State.Coins 积分</span><span class="avatar">🙂</span></div></header>
 @if (Game.StorageError is not null) { <div class="storage-error" role="alert">@Game.StorageError</div> }
 @switch (view)

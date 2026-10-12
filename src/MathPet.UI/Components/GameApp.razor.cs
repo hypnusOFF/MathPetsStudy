@@ -92,6 +92,7 @@ public partial class GameApp
     private async Task ChallengeTopic(Topic topic){selectedTopicId=topic.Id;await Start(StudyMode.Challenge);}
     private void SelectTopic(ChangeEventArgs e){selectedTopicId=e.Value?.ToString();}
     private async Task OpenLesson(){State.ViewedTopics.Add(Topic.Id);lessonStep=0;await Game.SaveAsync();await Navigate(View.Lesson);}
+    private async Task Imported(){selectedTopicId=null;await Go(View.Home);await JS.InvokeVoidAsync("mathPet.configureSound",State.SoundEnabled);}
     private Task Navigate(View next)
     {
         if(view==View.Quiz && quiz is {Completed:false})

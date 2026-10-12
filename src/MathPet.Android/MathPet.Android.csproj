@@ -13,6 +13,8 @@
     <SupportedOSPlatformVersion>24.0</SupportedOSPlatformVersion>
     <AndroidPackageFormats>apk</AndroidPackageFormats>
     <RuntimeIdentifiers>android-arm64;android-x64</RuntimeIdentifiers>
+    <!-- Avoid inferring the Linux build host as an Android release architecture. -->
+    <PublishRuntimeIdentifier Condition="'$(Configuration)' == 'Release'">android-arm64</PublishRuntimeIdentifier>
   </PropertyGroup>
   <ItemGroup>
     <MauiIcon Include="Resources/AppIcon/appicon.svg" Color="#7860D9" />

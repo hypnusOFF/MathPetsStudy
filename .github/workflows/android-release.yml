@@ -1,0 +1,98 @@
+name: Publish Android release
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'New release version, e.g. 0.2.0 (must not already exist)'
+        required: true
+        type: string
+permissions:
+  contents: write
+concurrency:
+  group: android-release
+  cancel-in-progress: false
+jobs:
+  release:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    env:
+      ANDROID_HOME: /tmp/mathpet-android-sdk
+      MATHPET_VERSION: ${{ inputs.version }}
+      MATHPET_VERSION_CODE: ${{ github.run_number }}
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: main
+      - name: Validate release and signing configuration
+        env:
+          KEYSTORE: ${{ secrets.ANDROID_RELEASE_KEYSTORE_BASE64 }}
+          KEY_PASSWORD: ${{ secrets.ANDROID_RELEASE_PASSWORD }}
+        run: |
+          python3 - <<'PY'
+          import os, re
+          if not re.fullmatch(r'[0-9]+\.[0-9]+\.[0-9]+', os.environ['MATHPET_VERSION']):
+              raise SystemExit('Use a numeric version such as 0.2.0')
+          if not os.environ['KEYSTORE'] or not os.environ['KEY_PASSWORD']:
+              raise SystemExit('Configure ANDROID_RELEASE_KEYSTORE_BASE64 and ANDROID_RELEASE_PASSWORD in repository Actions secrets')
+          PY
+          echo "MATHPET_VERSION_CODE=$((10000 + MATHPET_VERSION_CODE))" >> "$GITHUB_ENV"
+          if gh release view "v$MATHPET_VERSION" >/dev/null 2>&1; then
+            echo 'Release already exists; use a new version.' >&2
+            exit 1
+          fi
+      - uses: actions/setup-dotnet@v5
+        with:
+          global-json-file: global.json
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '21'
+      - name: Prepare verified toolchain
+        env:
+          DOTNET_NUGET_SIGNATURE_VERIFICATION: 'true'
+        run: |
+          dotnet workload install maui-android --skip-manifest-update
+          python3 scripts/verify-workload-packages.py
+          python3 scripts/prepare-android-sdk.py
+      - name: Verify learning rules
+        run: |
+          python3 scripts/generate-question-bank.py --check
+          python3 scripts/audit-question-bank.py
+          python3 scripts/ci-command.py dotnet restore tests/MathPet.Core.Tests --locked-mode
+          python3 scripts/ci-command.py dotnet test tests/MathPet.Core.Tests --no-restore
+      - name: Decode private signing files
+        env:
+          KEYSTORE: ${{ secrets.ANDROID_RELEASE_KEYSTORE_BASE64 }}
+          KEY_PASSWORD: ${{ secrets.ANDROID_RELEASE_PASSWORD }}
+        run: |
+          python3 - <<'PY'
+          import base64, os, pathlib
+          root=pathlib.Path(os.environ['RUNNER_TEMP'])
+          for name,data in [('mathpet-release.keystore',base64.b64decode(os.environ['KEYSTORE'],validate=True)),('mathpet-password.txt',os.environ['KEY_PASSWORD'].encode())]:
+              path=root/name
+              path.write_bytes(data)
+              path.chmod(0o600)
+          with open(os.environ['GITHUB_ENV'],'a') as f:
+              f.write(f'MATHPET_RELEASE_KEYSTORE={root}/mathpet-release.keystore\nMATHPET_RELEASE_PASSWORD_FILE={root}/mathpet-password.txt\n')
+          PY
+      - name: Build signed release APK and ZIP
+        run: python3 scripts/ci-command.py bash scripts/build-release-android.sh
+      - name: Prepare release notes
+        run: |
+          cat > "$RUNNER_TEMP/release-notes.md" <<'NOTES'
+          下载 ZIP，解压后安装 APK；应用内更新入口可直接下载 APK。
+          同签名更新通常保留存档。早期临时签名体验包可能无法覆盖安装，请先导出存档并保存到应用外，安装后导入。
+          个人及家庭非商业使用按仓库 LICENSE 授权，其他用途需另获授权。
+          NOTES
+      - name: Publish reviewed main build
+        run: |
+          gh release create "v$MATHPET_VERSION" \
+            "artifacts/mathpet-$MATHPET_VERSION.apk" \
+            "artifacts/mathpet-$MATHPET_VERSION.apk.sha256" \
+            "artifacts/mathpet-$MATHPET_VERSION-android.zip" artifacts/update.json LICENSE \
+            --target "$(git rev-parse HEAD)" --title "数学宠物岛 $MATHPET_VERSION" \
+            --notes-file "$RUNNER_TEMP/release-notes.md" --latest
+      - name: Remove signing files
+        if: always()
+        run: rm -f "$RUNNER_TEMP/mathpet-release.keystore" "$RUNNER_TEMP/mathpet-password.txt"

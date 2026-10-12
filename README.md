@@ -105,3 +105,7 @@ bash scripts/build-android.sh
 题库后续审核与补齐结果见 [题库审核报告](docs/question-bank-audit.md)。独立验算运行 `python3 scripts/audit-question-bank.py`，其检查会在安卓CI构建前执行。
 
 教学视频入口现已改为课堂内官方播放器，拦截B站App协议跳转。支持分集切换、重载和关闭；实际课程播放仍需设备验收。验证结果及云端HTTP412限制见 [应用内教学视频](docs/in-app-video.md)。
+
+## 正式发行与应用更新
+
+Android 已接入启动自动检查、手动检查更新，以及首页存档导出和确认导入。正式发行使用单独的 **Publish Android release** 工作流，固定签名、递增版本号，并上传公开的 APK、ZIP 与版本信息。首次发行前需要仓库所有者配置签名 Secrets；具体操作、旧体验包迁移及验证边界见 [更新与发行说明](docs/app-updates.md)。原有 Actions 体验包仍使用临时签名，不作为正式更新渠道。

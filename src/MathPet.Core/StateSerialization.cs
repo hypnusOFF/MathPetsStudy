@@ -5,6 +5,15 @@ public static class StateSerialization
 {
     private static readonly JsonSerializerOptions Options = new() { WriteIndented = true };
     public static string Serialize(PlayerState state) => JsonSerializer.Serialize(state,Options);
+    public static PlayerState DeserializeBackup(string text)
+    {
+        using var document = JsonDocument.Parse(text);
+        var root = document.RootElement;
+        if (root.ValueKind != JsonValueKind.Object || !root.TryGetProperty("Coins", out _)
+            || (!root.TryGetProperty("Pets", out _) && !root.TryGetProperty("PetName", out _)))
+            throw new InvalidDataException("文件不是完整的数学宠物岛存档。");
+        return Deserialize(text);
+    }
     public static PlayerState Deserialize(string text)
     {
         var state = JsonSerializer.Deserialize<PlayerState>(text,Options) ?? throw new InvalidDataException("存档为空。");

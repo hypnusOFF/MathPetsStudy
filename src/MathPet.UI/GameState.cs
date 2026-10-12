@@ -19,6 +19,14 @@ public sealed class GameState(IPlayerStore store)
         catch (Exception) { StorageError = "本次进度未能保存。请检查设备可用空间，并重启应用。当前会话可以继续。"; }
         finally { gate.Release(); }
     }
+    public async Task ImportAsync(string json)
+    {
+        var next = StateSerialization.DeserializeBackup(json);
+        var engine = new GameEngine(next);
+        await gate.WaitAsync();
+        try { await store.SaveAsync(next); Engine = engine; StorageError = null; }
+        finally { gate.Release(); }
+    }
     public async Task ResetAsync()
     {
         var next = new PlayerState();

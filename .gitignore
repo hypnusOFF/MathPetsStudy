@@ -6,3 +6,8 @@ artifacts/
 *.keystore
 
 node_modules/
+
+# Private release signing material (must also be kept outside the checkout).
+*.jks
+*.p12
+mathpet-password.txt
